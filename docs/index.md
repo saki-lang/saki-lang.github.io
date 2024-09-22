@@ -1,4 +1,6 @@
 # Saki-Lang
+> [!WARNING]
+> This project is currently in active elaboration and development, with significant progress yet to be made before it is ready for use.
 
 ## Keywords and Identifiers
 
