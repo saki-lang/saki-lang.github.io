@@ -3,6 +3,10 @@ theme:
   name: material
   icon:
     logo: 'material/code-json'
+  features:
+    - content.action.edit
+    - navigation.tabs
+    - navigation.instant
   palette:
     # Palette toggle for light mode
     - media: "(prefers-color-scheme: light)"
