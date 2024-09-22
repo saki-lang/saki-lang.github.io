@@ -1,4 +1,5 @@
 # Saki-Lang
+
 > [!WARNING]
 > This project is currently in active elaboration and development, with significant progress yet to be made before it is ready for use.
 
@@ -40,46 +41,35 @@ Saki supports following keywords:
 
 ### Identifiers
 
-|    Universe     |                          Identifier                          |             Example              |                    Description                    |
-| :-------------: | :----------------------------------------------------------: | :------------------------------: | :-----------------------------------------------: |
-|        -        | `camelCaseWithEnglishOrGreekLetters` / `withOptionalPostfixSingleQuotation'` | `value`, `α`, `παράδειγμα`, `n'` |                      Values                       |
-| $\mathcal{U}_0$ |   `PascalCaseInEnglish` / A single blackboard bold letter    |            `Nat`, `ℕ`            |                       Types                       |
-| $\mathcal{U}_1$ |          `'PascalCaseWithAPrefixedSingleQuotation`           |       `'Type`, `'Runnable`       |                Contract universes                 |
-| $\mathcal{U}_2$ |                         `#Universe`                          |           `#Universe`            | The universe that all contract universes lives in |
-| $\mathcal{U_n}$ |                     `'Type_n` / `'Typeₙ`                     |       `'Type_3`, `'Type₃`        |              Higher-level universes               |
+|                          Identifier                          |             Example              |                    Description                    |
+| :----------------------------------------------------------: | :------------------------------: | :-----------------------------------------------: |
+| `camelCaseWithEnglishOrGreekLetters` / `withOptionalPostfixSingleQuotation'` | `value`, `α`, `παράδειγμα`, `n'` |                      Values                       |
+|   `PascalCaseInEnglish` / A single blackboard bold letter    |            `Nat`, `ℕ`            |                       Types                       |
+|          `'PascalCaseWithAPrefixedSingleQuotation`           |       `'Type`, `'Runnable`       |                Contract universes                 |
+|                         `#Universe`                          |           `#Universe`            | The universe that all contract universes lives in |
+|                     `'Type_n` / `'Typeₙ`                     |       `'Type_3`, `'Type₃`        |              Higher-level universes               |
 
 ## Terms
 
 ### Basic Subtype Relationship
 
-In type theory, subtyping formalizes a notion of substitutability between types, where a term of one type can be used in any context where a term of another (super)type is expected. The subtyping relation, written as \(T_1 <: T_2\), expresses that type \(T_1\) is a subtype of \(T_2\), meaning that every term of type \(T_1\) can be safely used where a term of type \(T_2\) is required.
+In type theory, subtyping formalizes a notion of substitutability between types, where a term of one type can be used in any context where a term of another (super)type is expected. The subtyping relation, written as $T_1 <: T_2$, expresses that type $T_1$ is a subtype of $T_2$, meaning that every term of type $T_1$ can be safely used where a term of type $T_2$ is required.
 
 #### Reflexivity of Subtyping
 
 The first rule expresses the **reflexivity** of subtyping:
 $$
-\begin{align}
-\begin{array}{c}
-\\\hline
 T <: T
-\end{array}
-\end{align}
 $$
-This states that any type \(T\) is trivially a subtype of itself. Reflexivity is a foundational property ensuring that a type can always be substituted for itself.
+This states that any type $T$ is trivially a subtype of itself. Reflexivity is a foundational property ensuring that a type can always be substituted for itself.
 
 #### Transitivity of Subtyping
 
 The second rule describes the **transitivity** of the subtyping relation:
 $$
-\begin{align}
-\begin{array}{c}
-\Gamma \vdash T_1 <: T_2 \quad \Gamma \vdash T_2 <: T_3
-\\\hline
-\Gamma \vdash T_1 <: T_3
-\end{array}
-\end{align}
+\frac{\Gamma \vdash T_1 <: T_2 \quad \Gamma \vdash T_2 <: T_3}{\Gamma \vdash T_1 <: T_3}
 $$
-In words, if \(T_1\) is a subtype of \(T_2\) and \(T_2\) is a subtype of \(T_3\), then \(T_1\) is also a subtype of \(T_3\). 
+In words, if $T_1$ is a subtype of $T_2$ and $T_2$ is a subtype of $T_3$, then $T_1$ is also a subtype of $T_3$. 
 
 ### Primitive Terms
 
@@ -112,13 +102,7 @@ Here, `A -> B` represents the type of a function that takes an argument of the f
 
 The basic typing rule for functions follows from the lambda calculus. For a function term $\lambda (x: T_1) . t$ that takes an argument $x$ of type $T_1$ and returns a result $t$ of type $T_2$, the corresponding typing rule is:
 $$
-\begin{align}
-\begin{array}{c}
-\Gamma, x: T_1 \vdash t: T_2
-\\\hline
-\Gamma \vdash \lambda (x: T_1) . t : T_1 \rightarrow T_2
-\end{array}
-\end{align}
+\frac{\Gamma, x: T_1 \vdash t: T_2}{\Gamma \vdash \lambda (x: T_1) \,.\, t : T_1 \rightarrow T_2}
 $$
 
 This states that: Given a context $\Gamma$ and assuming that $x$ is a variable of type $T_1$, if the term $t$ has type $T_2$, then the lambda abstraction $\lambda (x: T_1) . t$ (a function taking $x$ as an argument) has the type $T_1 \rightarrow T_2$.
@@ -127,13 +111,7 @@ This states that: Given a context $\Gamma$ and assuming that $x$ is a variable o
 
 Subtyping in function types adheres to the principles of ***contravariance*** for the argument types and ***covariance*** for the return types. This is formally captured by the subtyping rule for function types:
 $$
-\begin{align}
-\begin{array}{c}
-\Gamma\vdash A_1 >: B_1 \quad A_2 <: B_2 
-\\\hline
-\Gamma\vdash A_1 \rightarrow A_2 <: B_1 \rightarrow B_2
-\end{array}
-\end{align}
+\frac{\Gamma \vdash A_1 >: B_1 \quad A_2 <: B_2}{\Gamma \vdash A_1 \rightarrow A_2 <: B_1 \rightarrow B_2}
 $$
 
 - **Contravariance in the argument:** If $A_1$ is a supertype of $B_1$ ($A_1 >: B_1$), then we can safely replace $B_1$ with $A_1$ in the function's input position, meaning that $A_1 \rightarrow A_2$ is a subtype of $B_1 \rightarrow A_2$.
@@ -202,37 +180,19 @@ This can be read as: for all $x$ of type $A$, the type of the result is $B(x)$, 
 ##### Formation Rule
 The $\Pi$-type is formed when the return type is dependent on the input value. The rule for forming a dependent function type is:
 $$
-\begin{align}
-\begin{array}{c}
-\Gamma ,x:A \vdash B: \mathcal{U}
-\\\hline
-\Gamma\vdash \Pi (x:A) \,.\, B: \mathcal{U}
-\end{array}
-\end{align}
+\frac{\Gamma ,x:A \vdash B: \mathcal{U}}{\Gamma \vdash \Pi (x:A) \,.\, B: \mathcal{U}}
 $$
 This rule means that if the return type $B(x)$ is well-formed in the universe $\mathcal{U}$ when $x$ has type $A$, then the dependent function type $\Pi(x:A) . B(x)$ is also well-formed in the universe.
 
 ##### Introduction Rule
 $$
-\begin{align}
-\begin{array}{c}
-\Gamma ,x:A \vdash B: \mathcal{U} \quad \Gamma ,x:A \vdash b : B
-\\\hline
-\Gamma\vdash \lambda (x:A)\,.\,b : \Pi (x:A) \,.\, B
-\end{array}
-\end{align}
+\frac{\Gamma ,x:A \vdash B: \mathcal{U} \quad \Gamma ,x:A \vdash b : B}{\Gamma \vdash \lambda (x:A)\,.\,b : \Pi (x:A) \,.\, B}
 $$
 This rule means that if $b$ is a term of type $B(x)$ when $x$ has type $A$, then the lambda abstraction $\lambda (x:A) . b$ has the dependent function type $\Pi(x:A) . B(x)$.
 
 ##### Application Rule
 $$
-\begin{align}
-\begin{array}{c}
-\Gamma \vdash f : \Pi(x:A)\,.\,B \quad \Gamma \vdash a: A
-\\\hline
-\Gamma\vdash f \ a : [x \mapsto a]B
-\end{array}
-\end{align}
+\frac{\Gamma \vdash f : \Pi(x:A)\,.\,B \quad \Gamma \vdash a: A}{\Gamma \vdash f \ a : [x \mapsto a]B}
 $$
 
 This rule governs how to apply a dependent function. If $f$ is a function of dependent type $\Pi(x:A) . B(x)$ and $a$ is a term of type $A$, then applying $f$ to $a$ gives a result of type $B(a)$.
@@ -240,36 +200,25 @@ This rule governs how to apply a dependent function. If $f$ is a function of dep
 ##### Beta-Reduction Rule
 
 $$
-\begin{align}
-\begin{array}{c}
-\Gamma\vdash a: A \quad \Gamma ,x:A \vdash B: \mathcal{U} \quad \Gamma ,x:A \vdash b : B
-\\\hline
-\Gamma\vdash (\lambda (x:A)\,.\,b)\ a \equiv [x\mapsto a] b : \Pi (x:A) \,.\, B
-\end{array}
-\end{align}
+\frac{\Gamma \vdash a: A \quad \Gamma ,x:A \vdash B: \mathcal{U} \quad \Gamma ,x:A \vdash b : B}{\Gamma \vdash (\lambda (x:A)\,.\,b)\ a \equiv [x\mapsto a] b : \Pi (x:A) \,.\, B}
 $$
 This rule is a version of beta-reduction for dependent types. It states that applying a lambda abstraction to an argument results in substituting the argument for the bound variable in the body of the lambda expression. 
 
 $$
-\begin{align}
-\begin{array}{c}
-\Gamma, x : A \vdash B : \mathcal{U}
-\\ \hline
-\Gamma \vdash \Lambda (x : A) \,.\, B : \Pi (x : A) \,.\, \mathcal{U}
-\end{array}
-\end{align}
+\frac{\Gamma, x : A \vdash B : \mathcal{U}}{\Gamma \vdash \Lambda (x : A) \,.\, B : \Pi (x : A) \,.\, \mathcal{U}}
 $$
 
 ##### Subtyping in Dependent Functions
 
 $$
-\begin{align}
+\frac{
 \begin{array}{c}
-\Gamma, x: A_1 \vdash B_1 : \mathcal{U} \quad \Gamma, y: A_2 \vdash B_2 : \mathcal{U} \\ \Gamma \vdash A_1 >: A_2 \quad \Gamma,\, x: A_1,\, y: A_2 \vdash B_1 <: B_2
-\\\hline
-\Gamma \vdash \Pi (x: A_1) \,.\, B_1 <: \Pi (x: A_2) \,.\, B_2
+\Gamma, x: A_1 \vdash B_1 : \mathcal{U} \quad \Gamma, y: A_2 \vdash B_2 : \mathcal{U} \\
+\Gamma \vdash A_1 >: A_2 \quad \Gamma,\, x: A_1,\, y: A_2 \vdash B_1 <: B_2
 \end{array}
-\end{align}
+}{
+\Gamma \vdash \Pi (x: A_1) \,.\, B_1 <: \Pi (x: A_2) \,.\, B_2
+}
 $$
 
 #### Examples
@@ -579,37 +528,33 @@ In formal terms, the behavior of sum types is governed by subtyping relationship
 The following rule describes subtyping for sum types in the covariant case:
 
 $$
-\begin{align}
-\begin{array}{c}
+\frac{
 \forall i \,.\, \exists j \,.\, (\Gamma \vdash A_i <: B_j)
-\\\hline
+}{
 \Gamma \vdash \bigsqcup_i A_i <: \bigsqcup_j B_j
-\end{array}
-\end{align}
+}
 $$
 
-This rule asserts that if for every component type \(A_i\) in the sum type \(\bigsqcup_i A_i\), there exists a corresponding type \(B_j\) in the sum type \(\bigsqcup_j B_j\), and \(A_i\) is a subtype of \(B_j\), then the sum of all \(A_i\) is a subtype of the sum of all \(B_j\). This reflects the **covariance** of sum types, meaning that they preserve subtyping relationships when their component types are related by subtyping.
+This rule asserts that if for every component type $A_i$ in the sum type $\bigsqcup_i A_i$, there exists a corresponding type $B_j$ in the sum type $\bigsqcup_j B_j$, and $A_i$ is a subtype of $B_j$, then the sum of all $A_i$ is a subtype of the sum of all $B_j$. This reflects the **covariance** of sum types, meaning that they preserve subtyping relationships when their component types are related by subtyping.
 
 ##### Subtyping Rule for Sum Types (Contravariant)
 
 There is also a corresponding rule for contravariant subtyping of sum types, where the direction of the subtyping relationship is reversed:
 
 $$
-\begin{align}
-\begin{array}{c}
+\frac{
 \Gamma \vdash \forall i \,.\, \exists j \,.\, (A_i >: B_j)
-\\\hline
+}{
 \Gamma \vdash \bigsqcup_i A_i >: \bigsqcup_j B_j
-\end{array}
-\end{align}
+}
 $$
 
-This means that if for every component type \(A_i\) in the sum type \(\bigsqcup_i A_i\), there exists a corresponding type \(B_j\) in the sum type \(\bigsqcup_j B_j\), and \(A_i\) is a **supertype** of \(B_j\), then the sum of all \(A_i\) is a **supertype** of the sum of all \(B_j\). This rule reflects the **contravariant** nature of certain contexts, such as function parameters, where subtypes behave in the opposite direction.
+This means that if for every component type $A_i$ in the sum type $\bigsqcup_i A_i$, there exists a corresponding type $B_j$ in the sum type $\bigsqcup_j B_j$, and $A_i$ is a **supertype** of $B_j$, then the sum of all $A_i$ is a **supertype** of the sum of all $B_j$. This rule reflects the **contravariant** nature of certain contexts, such as function parameters, where subtypes behave in the opposite direction.
 
 
 #### Intuition Behind the Typing Rules
 
-The subtyping rules for sum types are based on the notion of type containment and choice. A sum type \(A | B\) is essentially saying that a value belongs to **either** \(A\) or \(B\), but not both at the same time. Therefore:
+The subtyping rules for sum types are based on the notion of type containment and choice. A sum type $A | B$ is essentially saying that a value belongs to **either** $A$ or $B$, but not both at the same time. Therefore:
 
 - **Covariance** (first rule) applies when the subtypes on the left-hand side can be safely used as substitutes for the types on the right-hand side. This occurs when the sum type's components are subtypes of the corresponding components in the supertype sum.
 - **Contravariance** (second rule) works in the opposite direction, often in contexts where the sum type appears as a function argument. In such cases, the supertype on the left-hand side can safely be used where the subtype on the right-hand side is expected.
@@ -992,17 +937,17 @@ In this form:
    Using **contract universes**, Saki can define inductive types with constraints, such as a binary search tree where nodes satisfy a comparison constraint:
 
    ```scala
-   universe 'GreaterThan(A: 'Type) = contract {
-       require gt(self, A: 'Type): Bool
+   universe 'LessThan(A: 'Type) = contract {
+       require (<)(self, A: 'Type): Bool
    }
 
-   def Tree[A: 'GreaterThan(A)]: 'Type = inductive {
+   def Tree[A: 'LessThan(A)]: 'Type = inductive {
        Leaf : this
        Node : A -> Tree[A] -> Tree[A] -> this
    }
    ```
 
-   - The `Tree` inductive type represents a binary tree structure where the values stored in the nodes satisfy the `GreaterThan` constraint.
+   - The `Tree` inductive type represents a binary tree structure where the values stored in the nodes satisfy the `LessThan` constraint.
    - `Leaf` represents an empty tree.
    - `Node` represents a tree node containing a value of type `A` and two subtrees.
 
@@ -1031,10 +976,10 @@ In this form:
 In Saki, the constructors of inductive types can be accessed using the `::` operator. For example:
 
 ```
-Option(Nat)::Some
+Option(ℕ)::Some
 ```
 
-This refers to the `Some` constructor of the `Option(Nat)` inductive type.
+This refers to the `Some` constructor of the `Option(ℕ)` inductive type.
 
 #### Pattern Matching on Inductive Types
 
@@ -1111,14 +1056,14 @@ Each constructor defines a specific form that a value of the ADT can take, eithe
 
 3. **RB-Tree Type:**
 
-   In Saki, algebraic data types can be parameterized by both types and contract universes. This allows the definition of types like binary trees with additional constraints on the values stored in the tree nodes. Here’s an example of a RB-tree where the values must satisfy the `'GreaterThan` contract, which ensures that the values can be compared.
+   In Saki, algebraic data types can be parameterized by both types and contract universes. This allows the definition of types like binary trees with additional constraints on the values stored in the tree nodes. Here’s an example of a RB-tree where the values must satisfy the `'LessThan` contract, which ensures that the values can be compared.
 
    ```scala
-   universe 'GreaterThan(A: 'Type) = contract {
-       require gt(self, A: 'Type): Bool
+   universe 'LessThan(A: 'Type) = contract {
+       require (<)(self, A: 'Type): Bool
    }
    
-   type Tree[A: 'GreaterThan(A)] = enum {
+   type Tree[A: 'LessThan(A)] = enum {
        Leaf
        Node(Color, A, Tree[A], Tree[A])
    }
@@ -1128,14 +1073,14 @@ Each constructor defines a specific form that a value of the ADT can take, eithe
    - **Node**: Represents a tree node containing a `Color`, a value of type `A`, and two subtrees (`Tree[A]`).
 
    In this example:
-   - `Tree[A]` is parameterized by a type `A` that must satisfy the `'GreaterThan` contract, ensuring that `A` supports a comparison operation (`gt`).
+   - `Tree[A]` is parameterized by a type `A` that must satisfy the `'LessThan` contract, ensuring that `A` supports a comparison operation (`<`).
    - The `Node` constructor takes four parameters: a `Color`, a value of type `A`, and two subtrees of type `Tree[A]`. This models a binary search tree where each node is either `Red` or `Black` (as defined by the `Color` type).
 
    **Constructors:**
    - `Leaf: Tree[A]`
    - `Node: Color -> A -> Tree[A] -> Tree[A] -> Tree[A]`
 
-   This definition mirrors the concept of **algebraic data structures** like binary search trees in languages such as **Haskell** or **OCaml**, but adds the flexibility of enforcing additional constraints via contracts like `'GreaterThan(A)`.
+   This definition mirrors the concept of **algebraic data structures** like binary search trees in languages such as **Haskell** or **OCaml**, but adds the flexibility of enforcing additional constraints via contracts like `'LessThan(A)`.
 
 #### Type-Theoretic Foundation of Algebraic Data Types
 
@@ -1214,7 +1159,7 @@ universe 'Add = contract {
     require add(lhs: Self, rhs: Self): String
 }
 
-universe 'Mul(A: 'Type, R: 'Type) = contract {
+universe 'Mul(A R: 'Type) = contract {
     require mul(self, other: A): R
 }
 ```
@@ -1257,7 +1202,7 @@ The subtyping relation between universes follows several important properties, e
 In **Saki**, universes can also be **dependent types**, where the universe's constraints (predicates) depend on a parameter. For example, in the contract universe `'Mul`, the multiplication contract depends on two parameters, `A` and `R`, where `A` is the type being multiplied and `R` is the result type:
 
 ```scala
-universe 'Mul(A: 'Type, R: 'Type) = contract {
+universe 'Mul(A R: 'Type) = contract {
     require mul(self, other: A): R
 }
 ```
@@ -1275,7 +1220,7 @@ Here, the universe for types satisfying the multiplication contract is dependent
 Just like types and values, contract universes in Saki can be bound to a `let` expression. For example:
 
 ```scala
-let 'Mul: 'Type -> 'Type -> #Universe = |A: 'Type, R: 'Type| {
+let 'Mul: 'Type -> 'Type -> #Universe = |A R: 'Type| {
     return contract {
         decl mul(self, other: A): R
     }
@@ -1368,7 +1313,7 @@ This means that:
    Consider the `Option` type:
 
    ```scala
-   def getValue[A](opt: Option[A], default: A): A = match opt with {
+   def getValue[A: 'Type](opt: Option[A], default: A): A = match opt with {
        case Option[A]::Some(x) => x
        case Option[A]::None => default
    }
@@ -1393,164 +1338,512 @@ This means that:
 
 
 
-
-
 ## Definitions
 
-### Function Overloading
+In **Saki**, a **definition** is used to introduce named functions, constants, or operators within the type system. Definitions allow for explicit type annotations, parameter bindings, and a function body. The definition syntax is designed to handle **explicit** and **implicit** parameter lists, allowing for greater flexibility when defining generic, polymorphic functions.
 
-To introduce **function overloading** into **Martin-Löf Type Theory (MLTT)**, we define a new type construct, the **superposition type** ($\oplus$), to handle scenarios where a single function can take multiple types depending on the types of its inputs. Superposition types generalize the notion of function overloading, which is prevalent in programming languages but lacks formal representation in traditional type theory. The addition of superposition types enables polymorphism where the type of a function and its return value can vary depending on the input types, without violating the rigor of type theory.
+### Syntax of Definitions
+
+The syntax for defining functions or operators in Saki is structured as follows:
+
+```
+ParamBindings ::= Ident+ ':' Term
+ParamList     ::= ParamBindings (',' ParamBindings)*
+Definition    ::= 'def' (Ident|OpIdent) ('[' ParamList ']')? ('(' ParamList ')')? '=' Term
+```
+
+- **ParamBindings**: Defines one or more parameters, where `Ident+` represents one or more parameter identifiers, and `Term` represents the type of the parameters.
+- **ParamList**: A list of **ParamBindings**, separated by commas.
+- **Definition**: Starts with the `def` keyword, followed by the function name (or operator), and can optionally include:
+  - **Implicit Parameters** in square brackets (`[ParamList]`), typically used for type-level parameters or constraints.
+  - **Explicit Parameters** in parentheses (`(ParamList)`), representing the values passed to the function.
+  - The **function body**, which is the expression on the right-hand side of the `=` symbol that defines the behavior of the function.
+
+### Components of Definitions
+
+1. **Identifier**: The name of the function, constant, or operator. This can be a regular identifier or an operator (denoted as `OpIdent`).
+   
+2. **Implicit Parameters**: Parameters in square brackets (`[ ]`) are implicit, meaning they are typically inferred by the compiler during function application. These parameters are often used for **type parameters** or **contract constraints**. In Saki, these parameters are generally related to the type system and are inferred based on the arguments passed to the function.
+
+3. **Explicit Parameters**: Parameters in parentheses (`( )`) are explicit, meaning they must be provided by the caller. These are the **values** or **expressions** passed to the function when it is invoked.
+
+4. **Return Type**: The return type is specified after the parameter list and before the function body, indicating the type of the value returned by the function.
+
+5. **Function Body**: The expression or series of expressions that define the actual behavior of the function.
+
+### Typical Example of a Function Definition
+
+Consider a simple definition for a `map` function that operates on a list:
+
+```scala
+def map[A: 'Type](list: List[A], transform: A -> A): List[A] = ...
+```
+
+- **`map`** is the function name.
+- **`[A: 'Type]`** is the **implicit parameter list**:
+  - `A` is a type parameter, constrained by `'Type`, meaning it can be any type in the universe of types.
+  - The compiler infers the type `A` based on the type of the list passed to the function.
+- **`(list: List[A], transform: A -> A)`** is the **explicit parameter list**:
+  - `list` is a list of elements of type `A`.
+  - `transform` is a function that takes a value of type `A` and returns a new value of type `A`.
+- **`List[A]`** is the return type, indicating that the function returns a list of elements of type `A`.
+- **`...`** represents the function body, which defines how the elements of the list are transformed by the `transform` function.
+
+### Other Examples
+
+1. **Implicit and Explicit Parameters**:
+
+   In Saki, functions often have both implicit and explicit parameters. Implicit parameters allow for **generic** and **polymorphic** functions without needing to specify the type each time the function is called.
+
+   For example:
+
+   ```scala
+   def identity[A: 'Type](x: A): A = x
+   ```
+
+   - The function `identity` takes a single value `x` of type `A` and returns `x`.
+   - The type `A` is inferred from the argument passed to `identity`, so the user doesn't need to explicitly provide `A` when calling the function.
+
+2. **Type Constraints in Definitions**:
+
+   In Saki, **contract universes** can be used to impose constraints on the types of the parameters. For example, consider the following function that requires the type `A` to satisfy the `'Add` contract (i.e., it must support an `add` operation):
+
+   ```scala
+   def sum[A: 'Add](x: A, y: A): A = x.add(y)
+   ```
+
+   - The function `sum` takes two values `x` and `y` of type `A`.
+   - The type `A` is constrained by the contract `'Add`, meaning that `A` must implement the `add` method.
+   - The function returns the result of adding `x` and `y` using `A`'s `add` method.
+
+3. **Operator Definitions**:
+
+   Operators can be defined similarly to functions, using the same syntax. For example, a custom addition operator could be defined as follows:
+
+   ```scala
+   def (+)[A: 'Add](x: A, y: A): A = x.add(y)
+   ```
+
+   - The operator `+` is defined for any type `A` that satisfies the `'Add` contract.
+   - This allows users to use `+` in the same way they would for built-in numeric types, but it applies to any type that defines an `add` method.
+
+4. **Higher-Level Universe in Definition**
+
+    Consider a function that multiplies a value by itself, where the type `A` is constrained by the `'Mul` contract universe:
+
+    ```scala
+    def square[R: 'Type, A: 'Mul(A, R)](self: A): R = self.mul(self)
+    ```
+
+    - **`square`** is the function name.
+    - **`[R: 'Type, A: 'Mul(A, R)]`** are implicit parameters:
+      - `R` is a type, and `A` is a type constrained by the `'Mul(A, R)` contract, meaning that `A` must implement a `mul` method that returns a value of type `R`.
+    - **`(self: A)`** is the explicit parameter.
+    - The return type is `R`, the result of multiplying `self` by itself using the `mul` method.
+
+    This function is generic across any type `A` that supports multiplication, allowing it to work with numbers, matrices, or any other type that implements the `'Mul` contract.
+
+### Function Overloading in Saki
+
+In **Saki**, function overloading is introduced by leveraging a new type construct called the **superposition type** ($A \oplus B$), which allows a single function to operate over multiple input types, providing different behaviors based on the types of arguments passed to the function. This generalizes traditional function overloading, often found in programming languages, into the type-theoretic framework of **Martin-Löf Type Theory (MLTT)**. The superposition type formalizes this behavior, ensuring that function overloading is type-safe and rigorous, enabling polymorphism at the type level.
 
 #### Superposition Types
 
-The **superposition type** $A \oplus B$ captures the behavior of a function that can operate over multiple types simultaneously. Unlike sum types ($A \sqcup B$), which denote a disjoint union of types where a term belongs to either $A$ or $B$, a superposition type allows a term to be dynamically resolved depending on the argument type. This is akin to the concept of a quantum superposition, where the state collapses based on interaction (or, in this case, application of arguments). However, unlike a quantum measurement, superposition types can be applied multiple times.
+The **superposition type** $A \oplus B$ encapsulates the ability of a function to accept multiple types as input and return different types depending on the context of the application. Unlike a **sum type** ($A \sqcup B$), which restricts a term to belong to either $A$ or $B$, the superposition type dynamically resolves the term’s type based on the argument passed, making it applicable multiple times for different types.
 
-The following **typing rules** describe how terms of superposition type behave, allowing function overloading to be formalized in MLTT.
+For example, if a function can handle both integer and string types, its type would be expressed as $Int \oplus String$, meaning that the function can accept either type, and the appropriate behavior will be applied based on the argument.
 
-#### Typing Rules for Superposition
+#### Typing Rules for Superposition Types
+
+The rules for superposition types enable the safe typing and application of overloaded functions in the type system. These rules are as follows:
 
 1. **Term Typing for Superposition Types**:
+
 $$
-   \frac{\Gamma \vdash t: A \quad \Delta \vdash t: B}{\Gamma, \Delta \vdash t: A \oplus B}
+\frac{\Gamma \vdash t: A \quad \Delta \vdash t: B}{\Gamma, \Delta \vdash t: A \oplus B}
 $$
-   This rule asserts that if a term $t$ can be typed as $A$ in context $\Gamma$ and as $B$ in context $\Delta$, then $t$ can be assigned the type $A \oplus B$ under the combined context $\Gamma, \Delta$. The term $t$ now behaves polymorphically, resolving to $A$ or $B$ based on the input.
+
+If a term $t$ can be typed as both $A$ in context $\Gamma$ and $B$ in context $\Delta$, then $t$ can be assigned the superposition type $A \oplus B$ in the combined context $\Gamma, \Delta$. This allows the function to behave polymorphically, with its type determined by the argument.
 
 2. **Function Overloading with Superposition**:
-$$
-   \frac{\Gamma \vdash t: A \rightarrow B \quad \Delta \vdash t: A \rightarrow C}{\Gamma, \Delta \vdash t: A \rightarrow (B \oplus C)}
-$$
-   This rule allows the function $t$ to have different return types based on the context of its application. In context $\Gamma$, $t$ behaves as $A \rightarrow B$, while in context $\Delta$, it behaves as $A \rightarrow C$. Thus, the return type is $B \oplus C$, allowing the function to be overloaded depending on the argument type.
 
-3. **Application of Overloaded Functions**:
 $$
-   \frac{\Gamma \vdash f: (A \rightarrow B) \oplus (C \rightarrow D) \quad \Gamma \vdash t: A}{\Gamma \vdash f\ t: B}
+\frac{\Gamma \vdash t: A \rightarrow B \quad \Delta \vdash t: A \rightarrow C}{\Gamma, \Delta \vdash t: A \rightarrow (B \oplus C)}
 $$
-   This rule governs the application of overloaded functions. If a function $f$ has the superposition type $(A \rightarrow B) \oplus (C \rightarrow D)$, and it is applied to an argument $t$ of type $A$, the result will be of type $B$. This resolves the superposition at application time, depending on the input type.
+
+This rule allows a function to have multiple return types based on the context of its application. The function `t` can return either `B` in context $\Gamma$ or `C$ in context $\Delta$, and the final type is resolved as $B \oplus C$ depending on the argument.
+
+3. **Function Application for Overloaded Functions**:
+
+$$
+\frac{\Gamma \vdash f: (A \rightarrow B) \oplus (C \rightarrow D) \quad \Gamma \vdash t: A}{\Gamma \vdash f\ t: B}
+$$
+
+This rule governs the application of overloaded functions. If a function `f` has a superposition type $(A \rightarrow B) \oplus (C \rightarrow D)$, applying it to an argument of type `A` resolves the function to return type `B`.
 
 4. **Subtyping for Superposition Types**:
+
 $$
-   (A \sqcup B) <: (A \oplus B)
+(A \sqcup B) <: (A \oplus B)
 $$
-   A sum type $A \sqcup B$, representing an exclusive choice between $A$ and $B$, is a subtype of the corresponding superposition type $A \oplus B$, which captures a more flexible relationship, where the final type is determined by the context.
+
+This rule states that a sum type $A \sqcup B$, which represents an exclusive choice between `A` and `B`, is a subtype of the corresponding superposition type $A \oplus B$. Superposition types provide more flexibility, allowing the function’s behavior to be dynamically resolved based on the context.
+
+#### Example of Function Overloading with Superposition
+
+Consider the following example where a function `f` can take either an integer or a string as input and perform different operations:
+
+```scala
+def f(x: Int): Int = x + 1
+def f(x: String): String = x + "!"
+```
+
+In **Saki**, this behavior would be captured by a superposition type:
+
+```scala
+f: (Int -> Int) ⊕ (String -> String)
+```
+
+When called with an integer, `f(5)` returns `6`; when called with a string, `f("Hello")` returns `"Hello!"`.
 
 #### Overloading via `let-in` Expressions
 
-We extend the **`let-in` expression** in MLTT to incorporate function overloading using superposition types. The general form of the `let-in` expression is:
+The **`let-in` expression** in Saki can also incorporate superposition types, allowing for function overloading in local contexts. The general form of the `let-in` expression is:
+
 $$
 \text{let } x = t_1 \text{ in } t_2
 $$
-Where:
-- $x$ is bound to the term $t_1$,
-- $t_2$ is the body in which $x$ is used.
 
-If $t_1$ has a superposition type, the variable $x$ inherits this type, and the body $t_2$ must be typed accordingly for each branch of the superposition.
+If `t_1` has a superposition type, the variable `x` inherits this type, and the body `t_2` must handle each possible type that `x` may take on.
 
-#### Typing Rule for Overloaded `let-in`
+**Typing Rule for Overloaded `let-in`**:
 
 1. **Basic `let-in` with Superposition**:
-$$
-   \frac{\Gamma \vdash t_1 : A \oplus C \quad \Gamma, x:A \vdash t_2 : B \quad \Gamma, x:C \vdash t_2 : D}{\Gamma \vdash \text{let } x = t_1 \text{ in } t_2 : B \oplus D}
-$$
-   This rule formalizes the `let-in` construct with superposition:
-   - $t_1$ has a superposition type $A \oplus C$,
-   - $t_2$ must be well-typed under both contexts $\Gamma, x:A$ and $\Gamma, x:C$, producing the types $B$ and $D$, respectively.
-   - The resulting type of the `let-in` expression is $B \oplus D$, reflecting the type resolution based on the specific branch of the superposition.
 
-2. **Application of Overloaded Functions in `let-in`**:
 $$
-   \frac{\Gamma \vdash t_1 : (A \rightarrow B) \oplus (C \rightarrow D) \quad \Gamma, x:A \vdash t_2 : E \quad \Gamma, x:C \vdash t_2 : F}{\Gamma \vdash \text{let } x = t_1 \text{ in } t_2 : E \oplus F}
+\frac{\Gamma \vdash t_1 : A \oplus C \quad \Gamma, x:A \vdash t_2 : B \quad \Gamma, x:C \vdash t_2 : D}{\Gamma \vdash \text{let } x = t_1 \text{ in } t_2 : B \oplus D}
 $$
-   This rule extends the `let-in` expression to handle **function application** with overloading:
-   - $t_1$ is an overloaded function with the superposition type $(A \rightarrow B) \oplus (C \rightarrow D)$,
-   - The body $t_2$, which applies the function $x$, must be typed under both $\Gamma, x:A$ and $\Gamma, x:C$, producing the types $E$ and $F$, respectively.
-   - The resulting type of the `let-in` expression is $E \oplus F$, reflecting the fact that function overloading has occurred, and the type depends on which branch of the superposition is invoked.
 
-### Handling Function Overloading
+In this case:
+- `t_1` has the superposition type `A \oplus C`.
+- `t_2` is well-typed under both contexts $\Gamma, x:A$ and $\Gamma, x:C$, producing types `B` and `D`.
+- The resulting type of the `let-in` expression is `B \oplus D`, reflecting the dynamic resolution based on the branch of the superposition.
 
-Function overloading in MLTT is thus formalized by introducing **superposition types** that enable a single function to take on multiple types, depending on the input type. Superposition types generalize the notion of function overloading found in practical programming languages, ensuring that overloaded terms are well-typed under all possible contexts while preserving the consistency of the type system.
+#### Function Overloading in Context
 
-For example, consider an overloaded function $f$ with the type:
-$$
-f : (A \rightarrow B) \oplus (C \rightarrow D)
-$$
-This superposition type reflects that $f$ can either behave as a function from $A$ to $B$ or from $C$ to $D$. The specific behavior of $f$ depends on the type of argument passed during function application. When applied to an argument of type $A$, the function resolves to a type $B$; similarly, when applied to an argument of type $C$, it resolves to a type $D$.
+In **Saki**, overloaded functions may operate on different types, but their behavior and return type must be well-typed in each case. For example, consider the following overloaded function `g`:
+
+```scala
+def g(x: Int): String = "The number is " + x.toString
+def g(x: Bool): String = if x then "True" else "False"
+```
+
+The type of `g` would be:
+
+```scala
+g: (Int -> String) ⊕ (Bool -> String)
+```
+
+When `g` is applied to an integer, it returns a string representing the number; when applied to a boolean, it returns `"True"` or `"False"`.
 
 
 
-## Function Elimination (Application) and Function Overloading
+
+
+### Function Elimination (Application) and Overloading in Saki
+
+In **Saki**, **function elimination** (or **function application**) refers to the process of applying a function to arguments and obtaining a result. This follows the standard rules of type theory, where a function of type `A → B` is applied to an argument of type `A`, yielding a result of type `B`. However, **Saki** extends this process to handle **function overloading** via **superposition types** ($A \oplus B$), which allow a function to operate over multiple argument types, returning different results based on the argument type.
+
+### Standard Function Application
+
+In traditional **function elimination** (without overloading), a function of type `A \rightarrow B` can be applied to an argument of type `A`. The general typing rule for this is:
+
 $$
-\begin{align}
-\begin{array}{c}
-\Gamma \vdash f: A \rightarrow B \quad \Gamma \vdash t: A
-\\\hline
-\Gamma \vdash f\ t: B
-\end{array}
-\end{align}
+\frac{\Gamma \vdash f: A \rightarrow B \quad \Gamma \vdash t: A}{\Gamma \vdash f\ t: B}
 $$
-Overloaded version:
+
+This rule states that if:
+- `f` is a function from `A` to `B` in the context $\Gamma$,
+- and `t` is a term of type `A` in the same context,
+
+then applying `f` to `t` results in a term of type `B`.
+
+#### Example:
+
+Consider a simple function `double` that takes an integer and returns its double:
+
+```scala
+def double(x: Int): Int = x * 2
+```
+
+The function `double` has the type `Int → Int`. Applying it to an integer argument proceeds as follows:
+
+```scala
+double(5) // Result: 10
+```
+
+### Function Application with Overloading
+
+When functions are **overloaded** via **superposition types**, the function's behavior is dependent on the type of the argument. The superposition type allows a function to operate on multiple types and dynamically resolve which version of the function to apply based on the argument’s type.
+
+The typing rule for overloaded functions is:
+
 $$
-\begin{align}
-\begin{array}{c}
-\Gamma \vdash f: (A \rightarrow B) \oplus (C \rightarrow D) \quad \Gamma \vdash t: A
-\\\hline
-\Gamma \vdash f\ t: B
-\end{array}
-\end{align}
+\frac{\Gamma \vdash f: (A \rightarrow B) \oplus (C \rightarrow D) \quad \Gamma \vdash t: A}{\Gamma \vdash f\ t: B}
 $$
+
+This rule means that if:
+- `f` is an overloaded function with the type `(A → B) ⊕ (C → D)` in the context $\Gamma$,
+- and `t` is an argument of type `A`,
+
+then applying `f` to `t` will resolve the function to return a result of type `B`.
+
+### Example 1: Function Overloading with Identical Return Types
+
+Consider the following overloaded function `describe`, which can take either an integer or a string:
+
+```scala
+def describe(x: Int): String = "The number is " + x.toString
+def describe(x: String): String = "The string is \"" + x + "\""
+```
+
+The function `describe` has the following type:
+
+```scala
+describe: (Int -> String) ⊕ (String -> String)
+```
+
+Which is identical to
+
+```
+describe: Int ⊕ String -> String
+```
+
+When applying `describe`, the behavior depends on the argument type:
+
+```scala
+describe(42)        // Result: "The number is 42"
+describe("Saki")    // Result: "The string is "Saki""
+```
+
+In this case:
+- When applied to an integer (`42`), the function returns a description of the number.
+- When applied to a string (`"Saki"`), the function returns a description of the string.
+
+### Example 2: Overloaded Function with Different Return Types
+
+Consider an overloaded function `addOrConcat` that operates on both numbers and strings, performing addition for numbers and concatenation for strings:
+
+```scala
+def addOrConcat(x: Int, y: Int): Int = x + y
+def addOrConcat(x: String, y: String): String = x + y
+```
+
+The type of this function is:
+
+```scala
+addOrConcat: (Int -> Int -> Int) ⊕ (String -> String -> String)
+```
+
+Application:
+
+```scala
+addOrConcat(3, 4)        // Result: 7
+addOrConcat("Hello, ", "world!")  // Result: "Hello, world!"
+```
+
+Here, the overloaded function `addOrConcat`:
+- Adds integers when passed two integers.
+- Concatenates strings when passed two strings.
+
+### Example 3: Overloaded Function with Records
+
+In **Saki**, you can also define overloaded functions that operate on **records**. Consider a record type `Cat` and an overloaded function `describeAnimal` that describes either a `Cat` or a `Dog`:
 
 ```scala
 type Cat = record {
     name: String
-    age: Nat
+    age: ℕ
 }
 
-def eat(cat: Cat, food: String) = {
-    println("Cat ${cat.name} is eating ${food}")
+type Dog = record {
+    name: String
+    breed: String
 }
 
+def describeAnimal(cat: Cat): String = "Cat ${cat.name} is ${cat.age.toString} years old."
+def describeAnimal(dog: Dog): String = "Dog ${dog.name} is of breed ${dog.breed}."
+```
+
+The overloaded function `describeAnimal` has the type:
+
+```scala
+describeAnimal: Cat ⊕ Dog -> String
+```
+
+Application:
+
+```scala
 let cat = Cat^ {
-    name = "alice"
+    name = "Alice",
     age = 5
 }
+
+let dog = Dog^ {
+    name = "Buddy",
+    breed = "Golden Retriever"
+}
+
+describeAnimal(cat)  // Result: "Cat Alice is 5 years old."
+describeAnimal(dog)  // Result: "Dog Buddy is of breed Golden Retriever."
 ```
 
-These four kinds of application are identical:
+Here, the function dynamically resolves to:
+- Describe a `Cat` if the argument is of type `Cat`.
+- Describe a `Dog` if the argument is of type `Dog`.
 
-```
-eat cat "fish"
-eat(cat, fish)
-cat.eat "fish"
-cat.eat("fish")
-```
+### Type Safety in Function Elimination
+
+**Function elimination** in **Saki** enforces strict type safety, ensuring that:
+- Overloaded functions are applied to the correct argument types.
+- The return type is properly resolved based on the argument type.
+- The use of **superposition types** allows dynamic resolution without violating the rules of **MLTT**, ensuring that overloaded functions are rigorously well-typed.
 
 
 
 ## Decorator
 
+A **decorator** in **Saki** is a higher-order function that takes another function as its argument and returns a new function with the same type signature. Decorators allow for the dynamic augmentation of functions with additional functionality, enhancing the behavior of the original function without modifying its core logic. In essence, a decorator has the type:
+
+$$
+(T \rightarrow R) \rightarrow (T \rightarrow R)
+$$
+
+This means it takes a function of type `T -> R` and returns a function of the same type.
+
+Decorators in **Saki** can be applied directly to functions using a specific syntax. They enable modular code, where functionality can be extended in a reusable and composable manner.
+
+### Syntax
+
+The syntax for applying one or more decorators to a function is as follows:
+
 ```
-def debug[T R: 'Type](func: T -> R): T -> R = {
-    return |arg: T|: R => {
-        println("argument: ${arg}")
-        return func(arg)
-    } 
+DecoratorApply ::= '#' '[' Term (',' Term)* ']'
+```
+
+The general form for applying decorators looks like this:
+
+```
+#[dec1, dec2, ..., decN]
+def func: T -> R
+```
+
+- **`#[dec1, dec2, ..., decN]`**: Decorators are applied using a `#` followed by a list of decorators enclosed in square brackets. These decorators are applied to the function that follows.
+
+### Typing Rules
+
+Decorators must preserve the type signature of the functions they are applied to. If a function `func` has type `T -> R`, and a decorator `dec` transforms it while maintaining the same type, the resulting decorated function also has type `T -> R`. The typing rule can be formalized as:
+
+$$
+\frac{\Gamma \vdash func : T \rightarrow R \quad \Gamma \vdash dec : (T \rightarrow R) \rightarrow (T \rightarrow R)}{\Gamma \vdash dec(func) : T \rightarrow R}
+$$
+
+This ensures that the decorator takes in a function of type `T -> R` and returns a function with the same signature.
+
+### Examples of Decorators
+
+1. **Ensuring Positive Input Values**
+
+   Consider a decorator that ensures that a function only operates on positive input values. This decorator checks if the input is greater than 0 and only calls the original function if the condition is satisfied. Otherwise, it returns `None`.
+
+   ```scala
+   universe GreaterThan(T: 'Type) = contract {
+       require (>)(self, other: T): Bool
+   }
+
+   def ensurePositive[T: 'GreaterThan(ℕ)](func: T -> Option[T]): T -> Option[T] = {
+       return |arg: T|: Option[T] => if arg > 0 then func(arg) else None
+   }
+
+   #[ensurePositive]
+   def safeDivide(x: ℕ): Option[ℕ] = if x != 0 then Some(10 / x) else None
+   ```
+
+   - **`ensurePositive`**: The decorator checks if the input is greater than 0. If true, it calls the original function; otherwise, it returns `None`.
+   - **`safeDivide`**: This function divides 10 by the input value, but using the decorator, it is guaranteed to only operate on positive integers. If the input is 0 or negative, it returns `None`.
+
+2. **Transforming Input Before Applying a Function**
+
+   The following example demonstrates how a decorator can be used to modify the input before passing it to the original function.
+
+   ```scala
+   def mapInput[T1 T2 R: 'Type](transform: T1 -> T2, func: T2 -> R): T1 -> R = {
+       return |arg: T1|: R => func(transform(arg))
+   }
+
+   #[mapInput(|x: ℕ| => x * 2)]
+   def half(n: ℕ): ℕ = n / 2
+   ```
+
+   - **`mapInput`**: This decorator takes a transformation function and applies it to the input before passing it to the original function.
+   - **`half`**: This function divides the input by 2, but with the decorator applied, the input is first doubled, so `half(5)` would return the result of `10 / 2`, which is `5`.
+
+3. **Transforming the Output of a Function**
+
+   A decorator can also be used to modify the output of a function. In the following example, the decorator multiplies the function's result by 10.
+
+   ```scala
+   def mapOutput[T R1 R2: 'Type](func: T -> R1, transform: R1 -> R2): T -> R2 = {
+       return |arg: T|: R2 => transform(func(arg))
+   }
+   
+   #[mapOutput(|x: ℕ| => x * 10)]
+   def increment(n: ℕ): ℕ = n + 1
+   ```
+
+   - **`mapOutput`**: This decorator takes a transformation function and applies it to the output of the original function.
+   - **`increment`**: This function adds 1 to the input, but with the decorator, the result is multiplied by 10. So, `increment(5)` results in `60`, as `(5 + 1) * 10 = 60`.
+
+### Composition of Decorators
+
+Decorators in Saki can be composed. Multiple decorators can be applied to the same function in sequence. This means that each decorator applies its transformation on the function that results from the previous decorator.
+
+For example:
+
+```scala
+#[ensurePositive, mapOutput(|x: ℕ| => x * 10)]
+def safeDivideAndScale(x: ℕ): Option[ℕ] = if x != 0 then Some(10 / x) else None
+```
+
+In this case:
+- **`ensurePositive`** ensures that the function only operates on positive inputs.
+- **`mapOutput`** scales the result of the function by 10.
+
+If the input to `safeDivideAndScale` is `2`, the function returns `Some(50)` (since `10 / 2 = 5` and `5 * 10 = 50`). If the input is `0`, the function returns `None` due to `ensurePositive`.
+
+#### Contract Universes and Decorators
+
+In Saki, decorators can leverage **contract universes** to enforce behavior through constraints. For example, decorators like `ensurePositive` can depend on contract universes such as `'GreaterThan`, ensuring that the function operates only on types that support comparison.
+
+```scala
+universe GreaterThan(T: 'Type) = contract {
+    require (>)(self, other: T): Bool
 }
 
-#[debug]
-def write(content: List[Byte]) = {
-    // ...
+def ensurePositive[T: 'GreaterThan(ℕ)](func: T -> Option[T]): T -> Option[T] = {
+    return |arg: T|: Option[T] => if arg > 0 then func(arg) else None
 }
 ```
 
+In this example, the decorator relies on the contract universe `'GreaterThan`, ensuring that the input type supports the `>` operator. This enforces additional type safety by ensuring that only types adhering to this contract can use the decorator.
 
 
 
-
-
-## Example
+## Appendix A: Practical Example
 
 ```rust
-universe 'GreaterThan(A: 'Type) = contract {
-    require gt(self, A: 'Type): Bool
+universe 'LessThan(A: 'Type) = contract {
+    require (<)(self, A: 'Type): Bool
 }
 
 type Option(A: 'Type) = enum {
@@ -1563,42 +1856,42 @@ type Color = enum {
     Black
 }
 
-type Tree[A: 'GreaterThan(A)] = enum {
+type Tree[A: 'LessThan(A)] = enum {
     Leaf
     Node(Color, A, Tree[A], Tree[A])
 }
 
-impl [A: 'GreaterThan(A)] Tree[A] {
+impl [A: 'LessThan(A)] Tree[A] {
     def balance(self): Self = match self {
         case Self::Node(
             Color::Black, valueRight, 
             Self::Node(
-                  Color::Red, valueTop, 
-                  Self::Node(Color::Red, valueLeft, leftLeft, leftRight), 
+                Color::Red, valueTop, 
+                Self::Node(Color::Red, valueLeft, leftLeft, leftRight), 
                 rightLeft
-              ), rightRight
+            ), rightRight
         ) | Self::Node(
             Color::Black, valueRight, 
             Self::Node(
-                  Color::Red, valueLeft, 
-                  leftLeft, 
-                  Self::Node(Color::Red, valueTop, leftRight, rightLeft)
-              ), rightRight
+                Color::Red, valueLeft, 
+                leftLeft, 
+                Self::Node(Color::Red, valueTop, leftRight, rightLeft)
+            ), rightRight
         ) | Self::Node(
             Color::Black, valueLeft, 
             leftLeft, 
             Self::Node(
-                  Color::Red, valueRight, 
-                  Self::Node(Color::Red, valueTop, leftRight, rightLeft), 
-                  rightRight
-              ),
+                Color::Red, valueRight, 
+                Self::Node(Color::Red, valueTop, leftRight, rightLeft), 
+                rightRight
+            ),
         ) | Self::Node(
             Color::Black, valueLeft, 
             leftLeft, 
             Self::Node(
-                  Color::Red, valueTop, 
-                  leftRight, 
-                  Self::Node(Color::Red, valueRight, rightLeft, rightRight),
+                Color::Red, valueTop, 
+                leftRight, 
+                Self::Node(Color::Red, valueRight, rightLeft, rightRight),
             ),
         ) => Self::Node(
             Color::Red, valueTop, 
@@ -1631,6 +1924,3 @@ impl [A: 'GreaterThan(A)] Tree[A] {
     }
 }
 ```
-
-
-
