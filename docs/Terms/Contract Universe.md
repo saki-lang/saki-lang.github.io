@@ -17,24 +17,20 @@ universe 'Printable = contract {
 - The **`'Printable`** universe contains all types that satisfy the contract by implementing a `print` method that returns a `String`.
 
 The relationship between types and the universe $\mathcal{U}_P$ can be expressed as follows:
-
 $$
 T : \mathcal{U}_P \iff P(T)
 $$
-
-Where `P(T)` is a predicate that holds for a type `T`, meaning `T` satisfies the contract (or conditions) required by `P`.
+Where $P(T)$ is a predicate that holds for a type $T$, meaning $T$ satisfies the contract (or conditions) required by $P$.
 
 #### Typing Rules for Universes
 
 The typing rule for contract universes ensures that types are included in the universe only if they satisfy the required contract. In Saki, this is reflected in the following general typing rule:
-
 $$
 \frac{\Gamma \vdash T : \mathcal{U} \quad P(T)}{\Gamma \vdash T : \mathcal{U}_P}
 $$
-
 This rule states that:
 
-- If a type `T` belongs to a base universe `\mathcal{U}` and satisfies the predicate `P(T)` (such as implementing required contract methods), then `T` belongs to the universe $\mathcal{U}_P`, where $P$ represents the contract.
+- If a type $T$ belongs to a base universe $\mathcal{U}$ and satisfies the predicate $P(T)$ (such as implementing required contract methods), then $T$ belongs to the universe $\mathcal{U}_P$, where $P$ represents the contract.
 
 #### Universe Hierarchy and Subtyping
 
@@ -54,7 +50,7 @@ universe 'Mul(A R: 'Type) = contract {
 
 - The `'Add` universe includes all types that implement an `add` method, while the `'Mul` universe contains types that implement a `mul` method for multiplication.
 
-The **subtyping relation** between universes can be expressed as:
+The **subtyping relation** between universes can be expressed as: 
 
 $$
 \mathcal{U}_{P_1} <: \mathcal{U}_{P_2} \iff \forall T \,.\, (T : \mathcal{U}_{P_1} \implies T : \mathcal{U}_{P_2})
@@ -67,23 +63,25 @@ This means that a universe $\mathcal{U}_{P_1}$ is a subtype of another universe 
 The subtyping relation between universes follows several important properties, ensuring consistency in the hierarchy:
 
 1. **Reflexivity**:
-   Every universe is a subtype of itself:
-   $$
-   \mathcal{U}_P <: \mathcal{U}_P
-   $$
-   This holds because $P(T) \implies P(T)$ for any predicate $P$.
+Every universe is a subtype of itself:
+$$
+\mathcal{U}_P <: \mathcal{U}_P
+$$
+This holds because $P(T) \implies P(T)$ for any predicate $P$.
 
 2. **Antisymmetry**:
-   If two universes $\mathcal{U}_{P_1}$ and $\mathcal{U}_{P_2}$ are mutually subtypes of each other, they are equal:
-   $$
-   (\mathcal{U}_{P_1} <: \mathcal{U}_{P_2} \land \mathcal{U}_{P_2} <: \mathcal{U}_{P_1}) \implies \mathcal{U}_{P_1} = \mathcal{U}_{P_2}
-   $$
+If two universes $\mathcal{U}_{P_1}$ and $\mathcal{U}_{P_2}$ are mutually subtypes of each other, they are equal:
+
+$$
+(\mathcal{U}_{P_1} <: \mathcal{U}_{P_2} \land \mathcal{U}_{P_2} <: \mathcal{U}_{P_1}) \implies \mathcal{U}_{P_1} = \mathcal{U}_{P_2}
+$$
 
 3. **Transitivity**:
-   If universe $\mathcal{U}_{P_1}$ is a subtype of $\mathcal{U}_{P_2}$, and $\mathcal{U}_{P_2}$ is a subtype of $\mathcal{U}_{P_3}$, then $\mathcal{U}_{P_1}$ is a subtype of $\mathcal{U}_{P_3}$:
-   $$
-   (\mathcal{U}_{P_1} <: \mathcal{U}_{P_2} \land \mathcal{U}_{P_2} <: \mathcal{U}_{P_3}) \implies \mathcal{U}_{P_1} <: \mathcal{U}_{P_3}
-   $$
+If universe $\mathcal{U}_{P_1}$ is a subtype of $\mathcal{U}_{P_2}$, and $\mathcal{U}_{P_2}$ is a subtype of $\mathcal{U}_{P_3}$, then $\mathcal{U}_{P_1}$ is a subtype of $\mathcal{U}_{P_3}$:
+
+$$
+(\mathcal{U}_{P_1} <: \mathcal{U}_{P_2} \land \mathcal{U}_{P_2} <: \mathcal{U}_{P_3}) \implies \mathcal{U}_{P_1} <: \mathcal{U}_{P_3}
+$$
 
 #### Dependent Universes
 

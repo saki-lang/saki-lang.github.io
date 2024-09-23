@@ -1,11 +1,11 @@
 # Saki-Lang
 
-> [!WARNING]
-> This project is currently in active elaboration and development, with significant progress yet to be made before it is ready for use.
+!!! warning
+    This project is currently in active elaboration and development, with significant progress yet to be made before it is ready for use.
 
 ## Practical Example: Red-Black Tree in Saki
 
-```rust
+```scala
 universe 'LessThan(A: 'Type) = contract {
     require (<)(self, A: 'Type): Bool
 }
