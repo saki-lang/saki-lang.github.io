@@ -1,0 +1,131 @@
+{
+  "name": "saki",
+  "scopeName": "source.saki",
+  "patterns": [
+    {
+      "include": "#strings"
+    },
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#keywords"
+    },
+    {
+      "include": "#operators"
+    },
+    {
+      "include": "#literals"
+    },
+    {
+      "include": "#identifiers"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.block.saki",
+          "begin": "/\\*",
+          "end": "\\*/"
+        },
+        {
+          "name": "comment.line.double-slash.saki",
+          "match": "//.*$"
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.saki",
+          "match": "\\b(if|then|else|match|case|forall|exists)\\b"
+        },
+        {
+          "name": "keyword.operator.new.saki",
+          "match": "\\b(let|def|type|eval|impl|instance|record|inductive|flat|prefix|postfix|self|operator|binary|unary|left-assoc|right-assoc|tighter-than|looser-than|same-as)\\b"
+        }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.saki",
+          "match": "(->|=>|::|\\.|\\^|=|:|∀|Π|∃|Σ)"
+        },
+        {
+          "name": "keyword.operator.symbol.saki",
+          "match": "[+\\-/*<>=&!^%#:|@]+"
+        }
+      ]
+    },
+    "literals": {
+      "patterns": [
+        {
+          "name": "constant.numeric.imaginary.saki",
+          "match": "\\b([0-9]+(\\.[0-9]+)?i)\\b"
+        },
+        {
+          "name": "constant.numeric.saki",
+          "match": "\\b(0x[0-9a-fA-F]+|0o[0-7]+|0b[01]+|[0-9]+(\\.[0-9]+)?)\\b"
+        },
+        {
+          "name": "constant.character.saki",
+          "match": "'([^'\\\\]|\\\\.)'"
+        },
+        {
+          "name": "string.quoted.double.saki",
+          "begin": "\"",
+          "end": "\"",
+          "name": "string.regular.saki",
+          "patterns": [
+            {
+              "name": "constant.character.escape.saki",
+              "match": "\\\\."
+            }
+          ]
+        },
+        {
+          "name": "string.quoted.raw.saki",
+          "begin": "#\\{",
+          "end": "\\}",
+          "name": "string.raw.saki",
+          "patterns": [
+            {
+              "name": "constant.character.escape.saki",
+              "match": "\\\\."
+            }
+          ]
+        },
+        {
+          "name": "constant.language.boolean.saki",
+          "match": "\\b(true|false)\\b"
+        }
+      ]
+    },
+    "identifiers": {
+      "patterns": [
+        {
+          "name": "variable.parameter.saki",
+          "match": "\\b[a-zα-ω][a-zA-Zα-ωΑ-Ω0-9]*('*?)\\b"
+        },
+        {
+          "name": "entity.name.contract.saki",
+          "match": "\\b'([A-ZΑ-Ω][a-zA-Zα-ωΑ-Ω]*)\\b"
+        },
+        {
+          "name": "entity.name.type.saki",
+          "match": "\\b([A-ZΑ-Ω][a-zA-Zα-ωΑ-Ω]*)\\b"
+        },
+        {
+          "name": "entity.name.class.saki",
+          "match": "\\b([𝔸𝔹ℂ𝔻𝔼𝔽𝔾ℍ𝕀𝕁𝕂𝕃𝕄ℕ𝕆ℙℚℝ𝕊𝕋𝕌𝕍𝕎𝕏𝕐ℤ])\\b"
+        },
+        {
+          "name": "entity.name.function.operator.saki",
+          "match": "\\(([+\\-/*<>=&!^%#:|@]+)\\)"
+        }
+      ]
+    }
+  }
+}
