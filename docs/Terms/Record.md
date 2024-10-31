@@ -1,3 +1,7 @@
+<script type="module" src="/javascripts/editor.js"></script>
+<link rel="stylesheet" href="/static/styles.css">
+
+
 # Record
 
 Record terms in **Saki** represent structured data types that aggregate multiple named fields, each of which is associated with a specific type. They are similar to records or structs in other programming languages, providing a way to group related data under one composite type. The flexibility of records, along with the ability to organize fields with shared types concisely, makes them useful for modeling a wide variety of data structures.
@@ -55,30 +59,48 @@ This rule states that a record type with fields indexed by `S` is a subtype of a
 
 A simple record with fields `name` and `age`:
 
+<div class="code-editor" id="code-record-simple">
+
 ```
-record {
+eval record {
     name: String
-    age: ℕ
+    age: ℤ
 }
 ```
+</div>
+
+<div class="button-container">
+    <button class="md-button button-run" onclick="runCodeInEditor('code-record-simple', 'result-record-simple')">Run Example</button>
+</div>
+
+<div class="result-editor" id="result-record-simple"></div>
 
 This defines a record with two fields:
 
 - `name` of type `String`
-- `age` of type `ℕ` (natural number)
+- `age` of type `ℤ` (Integer)
 
 A record type like this can be used to represent an entity, such as a person, where each field holds specific data relevant to that entity.
 
 ### Nested Records and Higher-Level Universes
 
+<div class="code-editor" id="code-record-nested">
+
 ```
-record {  
+eval record {  
     name: String
     birthDate: record {
-        day month year: ℕ
+        day month year: ℤ
     }
 }
 ```
+</div>
+
+<div class="button-container">
+    <button class="md-button button-run" onclick="runCodeInEditor('code-record-nested', 'result-record-nested')">Run Example</button>
+</div>
+
+<div class="result-editor" id="result-record-nested"></div>
 
 Here, the `birthDate` field is a nested record with fields for `day`, `month`, and `year`, all of type `ℕ`. 
    
@@ -96,17 +118,26 @@ RecordValueTerm   ::= (Term | 'record') ‘^’ ‘{’ (FieldAssignment ((NL+|�
 
 Consider the following example of creating a `Point` record:
 
-```scala
-def Point = record {
+<div class="code-editor" id="code-record-point">
+
+```
+type Point = record {
     x y z: ℝ
 }
 
-let point = Point^ {
+eval Point '{
     x = 1.0
     y = 2.0
     z = 3.0
 }
 ```
+</div>
+
+<div class="button-container">
+    <button class="md-button button-run" onclick="runCodeInEditor('code-record-point', 'result-record-point')">Run Example</button>
+</div>
+
+<div class="result-editor" id="result-record-point"></div>
 
 This code defines a record type `Point` with three fields (`x`, `y`, `z`) of type `ℝ` (real numbers). The value `point` is an instance of the `Point` record, where the fields are assigned values: `x = 1.0`, `y = 2.0`, and `z = 3.0`.
 
@@ -114,18 +145,31 @@ This code defines a record type `Point` with three fields (`x`, `y`, `z`) of typ
 
 Suppose you have a function that operates on a subset of the fields in a record. Using Saki’s structural subtyping, you can pass records with extra fields to functions that only expect a subset. For example:
 
-```scala
-def printName(obj: record { name: String }): Unit = {
-    println(obj.name)
-}
+<div class="code-editor" id="code-record-subset">
 
-let person = record^ {
-    name: String = "Alice"
-    age: ℕ = 30
-}
-
-printName(person)
 ```
+type Person = record {
+    name: String
+    age: ℤ
+}
+
+def getName(obj: record { name: String }): String = obj.name
+
+eval {
+    let person = Person '{
+        name = "Sakiko Togawa"
+        age = 15
+    }
+    getName(person)
+}
+```
+</div>
+
+<div class="button-container">
+    <button class="md-button button-run" onclick="runCodeInEditor('code-record-subset', 'result-record-subset')">Run Example</button>
+</div>
+
+<div class="result-editor" id="result-record-subset"></div>
 
 Here, the `printName` function expects a record with only a `name` field. However, `person` is a record with both `name` and `age`. Thanks to structural subtyping, `person` can still be passed to `printName`, as the `name` field exists and has the correct type.
 

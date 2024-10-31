@@ -22,27 +22,26 @@ setUpEditor().then(() => {
         createEditor(element, null, true, false)
     }
 
-    for (let element of document.getElementsByClassName('result-editor')) {
-        createEditor(element, null, false, true)
-    }
+    // for (let element of document.getElementsByClassName('result-editor')) {
+    //     createEditor(element, null, false, true)
+    // }
 })
 
 async function createEditor(element, overrideContent = null, doHighlight = true, editorReadOnly = true) {
-    let content = element.textContent.trim()
-    element.textContent = undefined
+    let content = element.textContent.trim().replace(/^```|```$/g, '').trim();
+    element.textContent = undefined;
     if (overrideContent) {
-        content = overrideContent.trim()
+        content = overrideContent.trim();
     }
     let language = "text";
     if (doHighlight) language = 'saki';
     let darkMode = document.querySelector('meta[name="color-scheme"]').getAttribute("content");
 
-
-    let codeEditor = await monaco.editor.create(element, {
+    let editorConfig = {
         value: content,
         language: language,
         theme: darkMode === 'dark' ? 'dark-plus' : 'github-light',
-        automaticLayout: !editorReadOnly,
+        automaticLayout: true,
         minimap: { enabled: false }, // Disable minimap if desired
         scrollBeyondLastLine: !editorReadOnly, // Prevent scrolling beyond the last line
         scrollbar: {
@@ -52,26 +51,39 @@ async function createEditor(element, overrideContent = null, doHighlight = true,
         cursorSmoothCaretAnimation: 'on',
         readOnly: editorReadOnly,
         cursorBlinking: editorReadOnly ? 'hidden' : 'smooth',
-    })
+        unicodeHighlight: { ambiguousCharacters: false },
+        lineNumbersMinChars: 4,
+        lineDecorationsWidth: 0,
+        lineHeight: 1.5,
+        padding: { top: 10, bottom: 10 }
+    }
+
+    if (editorReadOnly) {
+        editorConfig.renderLineHighlight = 'none';
+        editorConfig.lineNumbers = 'off';
+        editorConfig.glyphMargin = false;
+        editorConfig.folding = false;
+        editorConfig.lineDecorationsWidth = 16;
+        editorConfig.lineNumbersMinChars = 0;
+    }
+
+    let codeEditor = await monaco.editor.create(element, editorConfig);
 
     if (editorReadOnly) {
         const resizeEditor = () => {
-            const editorHeight = codeEditor.getContentHeight() // minimum height
+            const editorHeight = codeEditor.getContentHeight(); // minimum height
             codeEditor.layout({ width: codeEditor.getLayoutInfo().width, height: editorHeight });
         };
         codeEditor.onDidContentSizeChange(resizeEditor);
     }
 
-    codeEditor.updateOptions({
-        unicodeHighlight: { ambiguousCharacters: false },
-    });
     element.codeEditor = codeEditor;
-    updateTheme()
+    updateTheme();
 }
 
 async function setUpEditor() {
-    const grammar = (await fetch('../assets/Saki.tmLanguage.json')).json();
-    const langConf = (await fetch('../assets/language-configuration.json')).json();
+    const grammar = (await fetch('/assets/Saki.tmLanguage.json')).json();
+    const langConf = (await fetch('/assets/language-configuration.json')).json();
     const highlighter = await shiki.createHighlighter({
         themes: [
             'dark-plus',
@@ -80,21 +92,22 @@ async function setUpEditor() {
         langs: [ grammar ],
     });
     monaco.languages.register({ id: 'saki' });
-    monaco.languages.setLanguageConfiguration('saki', langConf)
+    monaco.languages.setLanguageConfiguration('saki', langConf);
     shikiToMonaco(highlighter, monaco);
 }
 
 async function updateTheme() {
     let darkMode = document.querySelector('meta[name="color-scheme"]').getAttribute("content");
-    monaco.editor.setTheme(darkMode === 'dark' ? 'dark-plus' : 'github-light')
+    monaco.editor.setTheme(darkMode === 'dark' ? 'dark-plus' : 'github-light');
 }
 
-export function runCodeInEditor(codeEditorElementId, resultEditorElementId) {
+export async function runCodeInEditor(codeEditorElementId, resultEditorElementId) {
     let codeEditorElement = document.getElementById(codeEditorElementId);
     let resultEditorElement = document.getElementById(resultEditorElementId);
+    await createEditor(resultEditorElement, null, false, true);
     let code = codeEditorElement.codeEditor.getValue();
     resultEditorElement.codeEditor.setValue("Running...");
-    resultEditorElement.style.visibility = "visible"
+    resultEditorElement.style.display = "flex";
     fetch("https://api.saki-lang.tech/v1/exec", {
         method: "POST",
         headers: {
@@ -103,8 +116,8 @@ export function runCodeInEditor(codeEditorElementId, resultEditorElementId) {
         body: JSON.stringify({
             sandbox: "saki",
             command: "run",
-            files: { "": code }
-        })
+            files: { "": code },
+        }),
     }).then(response => response.json()).then(data => {
         resultEditorElement.codeEditor.setValue(data.stdout);
     }).catch(error => {
@@ -112,4 +125,4 @@ export function runCodeInEditor(codeEditorElementId, resultEditorElementId) {
     });
 }
 
-window.runCodeInEditor = runCodeInEditor
+window.runCodeInEditor = runCodeInEditor;

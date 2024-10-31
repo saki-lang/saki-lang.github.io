@@ -13,6 +13,7 @@ Saki is a statically typed, pure functional programming language that integrates
 
 <div class="playground-editor" id="code-playground">
 
+```
 eval "==== Red-Black Tree ===="
 
 type Option[A: 'Type] = inductive {
@@ -261,6 +262,7 @@ eval "The predecessor of 5 is " ++ myTree.predecessor(5).intOptionToString
 eval "The successor of 5 is " ++ myTree.successor(5).intOptionToString
 eval "The successor of 9 is " ++ myTree.successor(9).intOptionToString
 eval "The predecessor of 1 is " ++ myTree.predecessor(1).intOptionToString
+```
 </div>
 <div class="button-container">
     <button class="md-button button-run" onclick="runCodeInEditor('code-playground', 'result-playground')">Run Code</button>
@@ -270,12 +272,13 @@ eval "The predecessor of 1 is " ++ myTree.predecessor(1).intOptionToString
 
 ## REPL
 
-<iframe style="width:100%;height:500px" frameborder="0" src="https://saki-lang.tech/"></iframe>
+<iframe style="width:100%;height:500px" frameborder="0" src="https://repl.saki-lang.tech/"></iframe>
 
 
 ## Example: Theorem Prover
 
 <div class="code-editor" id="code-theorem-addzero">
+```
 def Eq(A: 'Type, a b: A): 'Type = ∀(P: A -> 'Type) -> P(a) -> P(b)
 
 def refl(A: 'Type, a: A): A.Eq(a, a) = {
@@ -339,6 +342,7 @@ def theoremPlusZero: ∀(n: ℕ) -> (n + o === n) = {
 }
 
 eval theoremPlusZero
+```
 </div>
 
 <div class="button-container">

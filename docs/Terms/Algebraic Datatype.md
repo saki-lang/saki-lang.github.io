@@ -23,7 +23,7 @@ Each constructor defines a specific form that a value of the ADT can take, eithe
 The `Color` type represents an ADT with no parameters. It has two possible values: `Red` and `Black`.
 
 ```scala
-type Color = enum {
+type Color = inductive {
     Red
     Black
 }
@@ -36,7 +36,7 @@ This is a simple ADT with no type parameters, where each constructor (`Red` and 
 The `Option` type is an algebraic datatype that represents a value that may or may not exist. It has two constructors: `None` (indicating no value) and `Some(A)` (indicating a value of type `A`).
 
 ```scala
-type Option(A: 'Type) = enum {
+type Option(A: 'Type) = inductive {
     None
     Some(A)
 }
