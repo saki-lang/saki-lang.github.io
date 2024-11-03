@@ -27,6 +27,9 @@ setUpEditor().then(() => {
     // }
 })
 
+const DARK_THEME = 'slack-dark';
+const LIGHT_THEME = 'slack-ochin';
+
 async function createEditor(element, overrideContent = null, doHighlight = true, editorReadOnly = true) {
     let content = element.textContent.trim().replace(/^```|```$/g, '').trim();
     element.textContent = undefined;
@@ -40,7 +43,7 @@ async function createEditor(element, overrideContent = null, doHighlight = true,
     let editorConfig = {
         value: content,
         language: language,
-        theme: darkMode === 'dark' ? 'dark-plus' : 'github-light',
+        theme: darkMode === 'dark' ? DARK_THEME : LIGHT_THEME,
         automaticLayout: true,
         minimap: { enabled: false }, // Disable minimap if desired
         scrollBeyondLastLine: !editorReadOnly, // Prevent scrolling beyond the last line
@@ -58,13 +61,18 @@ async function createEditor(element, overrideContent = null, doHighlight = true,
         padding: { top: 10, bottom: 10 }
     }
 
-    if (editorReadOnly) {
+    if (editorReadOnly && content.split('\n').length < 100) {
         editorConfig.renderLineHighlight = 'none';
         editorConfig.lineNumbers = 'off';
         editorConfig.glyphMargin = false;
         editorConfig.folding = false;
-        editorConfig.lineDecorationsWidth = 16;
+        editorConfig.lineDecorationsWidth = 20;
         editorConfig.lineNumbersMinChars = 0;
+        editorConfig.overviewRulerLanes = 0;
+    }
+
+    if (!doHighlight) {
+        editorConfig.wordWrap = 'on';
     }
 
     let codeEditor = await monaco.editor.create(element, editorConfig);
@@ -84,24 +92,28 @@ async function createEditor(element, overrideContent = null, doHighlight = true,
 async function setUpEditor() {
     const grammar = (await fetch('/assets/Saki.tmLanguage.json')).json();
     const langConf = (await fetch('/assets/language-configuration.json')).json();
+
+    let lightTheme = (await shiki.bundledThemes[LIGHT_THEME]()).default;
+    lightTheme.colors['editor.background'] = '#F8F8F8';
+
     const highlighter = await shiki.createHighlighter({
         themes: [
-            'dark-plus',
-            'github-light',
+            DARK_THEME,
+            lightTheme,
         ],
         langs: [ grammar ],
     });
     monaco.languages.register({ id: 'saki' });
     monaco.languages.setLanguageConfiguration('saki', langConf);
-    shikiToMonaco(highlighter, monaco);
+    await shikiToMonaco(highlighter, monaco);
 }
 
 async function updateTheme() {
     let darkMode = document.querySelector('meta[name="color-scheme"]').getAttribute("content");
-    monaco.editor.setTheme(darkMode === 'dark' ? 'dark-plus' : 'github-light');
+    monaco.editor.setTheme(darkMode === 'dark' ? DARK_THEME : LIGHT_THEME);
 }
 
-export async function runCodeInEditor(codeEditorElementId, resultEditorElementId) {
+export async function runCodeInEditor(codeEditorElementId, resultEditorElementId, isEval = false) {
     let codeEditorElement = document.getElementById(codeEditorElementId);
     let resultEditorElement = document.getElementById(resultEditorElementId);
     await createEditor(resultEditorElement, null, false, true);
@@ -116,7 +128,7 @@ export async function runCodeInEditor(codeEditorElementId, resultEditorElementId
         body: JSON.stringify({
             sandbox: "saki",
             command: "run",
-            files: { "": code },
+            files: { "": isEval ? "eval " + code : code },
         }),
     }).then(response => response.json()).then(data => {
         resultEditorElement.codeEditor.setValue(data.stdout);

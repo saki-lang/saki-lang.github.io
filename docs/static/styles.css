@@ -1,7 +1,16 @@
+.monaco-editor {
+    outline: none;
+    border: 0px !important;
+}
+
+.editor-wrapper, .monaco-editor, .editor-wrapper, .overflow-guard { 
+    border-radius: 8px !important; 
+}
+
 .code-editor {
     height: auto;
     width: 100%;
-    overflow-y: visible;
+    /* overflow-y: visible; */
 }
 
 .playground-editor {
@@ -24,16 +33,16 @@
 }
 
 .button-run {
-    padding: 4px 8px;
+    padding: 0;
     width: 150px;
     height: auto;
-    font-size: 0.7em;
+    font-size: 0.6em;
     align-items: center;
     justify-content: center;
 }
 
 .button-container {
-    padding: 4px 8px;
+    padding: 1% 2%;
     margin-top: 5px;
     margin-bottom: 5px;
     display: flex;

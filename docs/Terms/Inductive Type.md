@@ -102,7 +102,9 @@ def Tree[A: 'LessThan(A)]: 'Type = inductive {
 
 **Mutually recursive** inductive types allow for the simultaneous definition of two or more types that refer to each other. An example is the definition of even and odd natural numbers:
 
-```scala
+<div class="code-editor">
+
+```
 def Even: ℕ -> 'Type = inductive(ℕ) {
     EvenZero : Even(0)
     EvenSucc : ∀(n: ℕ) -> Even(n) -> Odd(succ n)
@@ -112,6 +114,8 @@ def Odd: ℕ -> 'Type = inductive(ℕ) {
     OddSucc : ∀(n: ℕ) -> Odd(n) -> Even(succ n)
 }
 ```
+</div>
+
 
 - `Even` and `Odd` are mutually recursive types. The constructors for `Even` and `Odd` refer to each other.
 - `EvenZero` asserts that `0` is even.
@@ -132,7 +136,9 @@ This refers to the `Some` constructor of the `Option(ℕ)` inductive type.
 
 Pattern matching is essential for working with inductive types in Saki. When a term of an inductive type is passed to a function, pattern matching is used to deconstruct the term and apply the appropriate logic based on the constructor. Consider the following example of inserting a value into a binary search tree:
 
-```scala
+<div class="code-editor">
+
+```
 def insert[A: 'Type](tree: Tree[A], newValue: A): Tree[A] = match tree {
     case Tree[A]::Leaf => Tree[A]::Node(newValue, Tree[A]::Leaf, Tree[A]::Leaf)
     case Tree[A]::Node(value, left, right) => if newValue < value then {
@@ -144,6 +150,7 @@ def insert[A: 'Type](tree: Tree[A], newValue: A): Tree[A] = match tree {
     }
 }
 ```
+</div>
 
 - The function `insert` uses pattern matching to handle different cases of the tree (`Leaf` or `Node`).
 - When `tree` is a `Leaf`, a new node is created with the `newValue`.

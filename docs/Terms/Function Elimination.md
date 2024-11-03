@@ -47,7 +47,7 @@ This rule means that if:
 
 then applying `f` to `t` will resolve the function to return a result of type `B`.
 
-## unction Overloading with Identical Return Types
+## Function Overloading with Identical Return Types
 
 Consider the following overloaded function `describe`, which can take either an integer or a string:
 

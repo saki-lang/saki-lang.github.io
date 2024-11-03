@@ -1,3 +1,5 @@
+# Martin-Löf Type Theory
+
 <script type="module" src="/javascripts/editor.js"></script>
 <link rel="stylesheet" href="/static/styles.css">
 
@@ -28,7 +30,7 @@ MLTT extends this correspondence by incorporating dependent types, allowing for 
 **Formation Rule**:
 
 $$
-\frac{\Gamma \vdash A \ \text{type} \quad \Gamma, x : A \vdash B(x) : \mathcal{U}}{\Gamma \vdash \Pi(x : A) . B(x) : \mathcal{U}}
+\frac{\Gamma \vdash A : \mathcal{U} \quad \Gamma, x : A \vdash B(x) : \mathcal{U}}{\Gamma \vdash \Pi(x : A) . B(x) : \mathcal{U}}
 $$
 
 **Introduction Rule**:
@@ -157,6 +159,7 @@ type Type = Value
 
 *Neutral values*, however, represent terms that are blocked from further reduction due to free variables or unsolved dependencies. Neutral values allow terms with unresolved components to be stored without forcing premature reductions. They are especially significant in representing expressions that cannot simplify further because they involve variables that are free in the current context.
 <div class="code-editor">
+
 ```
 type NeutralValue = inductive {
     // Variable: A neutral value representing an unresolved variable.
@@ -297,19 +300,19 @@ In formal terms, NBE employs structured definitions of evaluation and applicatio
 
 #### Evaluation Rules
 $$
-\llbracket x \rrbracket_{\rho} = \rho(x)
+⟦ x ⟧_{\rho} = \rho(x)
 $$
 
 For a variable $x$, evaluation retrieves $x$'s value from the environment $\rho$.
 
 $$
-\llbracket \lambda x.t \rrbracket_{\rho} = (\rho, \lambda x.t)
+⟦ \lambda x.t ⟧_{\rho} = (\rho, \lambda x.t)
 $$
 
 A lambda function evaluates to a closure with $\rho$ capturing the environment.
 
 $$
-\llbracket t \ u \rrbracket_{\rho} = \llbracket t \rrbracket_{\rho} \cdot \llbracket u \rrbracket_{\rho}
+⟦ t \ u ⟧_{\rho} = ⟦ t ⟧_{\rho} \cdot ⟦ u ⟧_{\rho}
 $$
 
 Application proceeds by evaluating both the function $t$ and argument $u$.
@@ -318,7 +321,7 @@ Application proceeds by evaluating both the function $t$ and argument $u$.
 Application between values distinguishes between closures and neutral values:
 
 $$
-(\rho, \lambda x.t) \cdot v = \llbracket t \rrbracket_{\rho[x \mapsto v]}
+(\rho, \lambda x.t) \cdot v = ⟦ t ⟧_{\rho[x \mapsto v]}
 $$
 If the function is a closure, the argument $v$ extends the environment.
 
@@ -622,8 +625,8 @@ def readBack(value: Value, env: Env): Term = match value {
  * @return The universe level as an `Int`.
  */
 def universeLevel(ty: Type): Int = match ty {
-    case Value::Type(univ) => univ                                  // Extract universe level.
-    case _ => panic("Failed to unwrap universe level: not a type")  // Panic if not a type.
+    case Value::Type(univ) => univ
+    case _ => panic("Failed to unwrap universe level: not a type")
 }
 
 /**

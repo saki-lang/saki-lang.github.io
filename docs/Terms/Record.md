@@ -1,8 +1,8 @@
-<script type="module" src="/javascripts/editor.js"></script>
-<link rel="stylesheet" href="/static/styles.css">
-
 
 # Record
+
+<script type="module" src="/javascripts/editor.js"></script>
+<link rel="stylesheet" href="/static/styles.css">
 
 Record terms in **Saki** represent structured data types that aggregate multiple named fields, each of which is associated with a specific type. They are similar to records or structs in other programming languages, providing a way to group related data under one composite type. The flexibility of records, along with the ability to organize fields with shared types concisely, makes them useful for modeling a wide variety of data structures.
 
@@ -62,18 +62,18 @@ A simple record with fields `name` and `age`:
 <div class="code-editor" id="code-record-simple">
 
 ```
-eval record {
+record {
     name: String
     age: ℤ
 }
 ```
 </div>
 
-<div class="button-container">
-    <button class="md-button button-run" onclick="runCodeInEditor('code-record-simple', 'result-record-simple')">Run Example</button>
+<!-- <div class="button-container">
+    <button class="md-button button-run" onclick="runCodeInEditor('code-record-simple', 'result-record-simple', true)">Run Example</button>
 </div>
 
-<div class="result-editor" id="result-record-simple"></div>
+<div class="result-editor" id="result-record-simple"></div> -->
 
 This defines a record with two fields:
 
@@ -87,7 +87,7 @@ A record type like this can be used to represent an entity, such as a person, wh
 <div class="code-editor" id="code-record-nested">
 
 ```
-eval record {  
+record {  
     name: String
     birthDate: record {
         day month year: ℤ
@@ -96,11 +96,11 @@ eval record {
 ```
 </div>
 
-<div class="button-container">
-    <button class="md-button button-run" onclick="runCodeInEditor('code-record-nested', 'result-record-nested')">Run Example</button>
+<!-- <div class="button-container">
+    <button class="md-button button-run" onclick="runCodeInEditor('code-record-nested', 'result-record-nested', true)">Run Example</button>
 </div>
 
-<div class="result-editor" id="result-record-nested"></div>
+<div class="result-editor" id="result-record-nested"></div> -->
 
 Here, the `birthDate` field is a nested record with fields for `day`, `month`, and `year`, all of type `ℕ`. 
    

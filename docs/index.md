@@ -1,8 +1,8 @@
-<script type="module" src="javascripts/editor.js"></script>
-<link rel="stylesheet" href="static/styles.css">
-
 
 # Introduction
+
+<script type="module" src="javascripts/editor.js"></script>
+<link rel="stylesheet" href="static/styles.css">
 
 !!! warning
     Saki-lang is currently in a very early stage of design and development, with substantial work required before it reaches a mature state. The prototype interpreter and REPL are still under active development, and no working interpreters are currently available.
