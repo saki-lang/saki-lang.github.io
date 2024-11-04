@@ -1,3 +1,8 @@
+# Expressions
+
+<script type="module" src="/javascripts/editor.js"></script>
+<link rel="stylesheet" href="/static/styles.css">
+
 ## If Expression Terms
 
 The **if-expression** in **Saki** provides a way to perform conditional branching, allowing a program to execute one of two expressions based on a boolean condition. Unlike some languages where control flow statements are separate from expressions, Saki’s **if-expression** integrates into the language's expression system, meaning that an **if-expression** always evaluates to a value.
@@ -23,9 +28,24 @@ $$
 \frac{\Gamma \vdash t_1: \mathbb{B} \quad \Gamma \vdash t_2: T \quad \Gamma \vdash t_3: T}{\Gamma \vdash \text{if } t_1 \text{ then } t_2 \text{ else } t_3 : T}
 $$
 
-This rule states that:
+Where:
+
 - The condition $t_1$ must have type `Bool` (denoted by $\mathbb{B}$).
 - The `then` and `else` branches ($t_2$ and $t_3$) must both have the same type $T$ for the if-expression to be well-typed.
+
+<div class="code-editor" id="code-if">
+
+```
+eval {
+    let value = 10
+    if value % 2 == 0 then "Even" else "Odd"
+}
+```
+</div>
+<div class="button-container">
+    <button class="md-button button-run" onclick="runCodeInEditor('code-if', 'result-if')">Run Code</button>
+</div>
+<div class="result-editor" id="result-if"></div>
 
 
 ## Match Expression Terms
@@ -56,39 +76,58 @@ $$
 \frac{\Gamma \vdash t: T \quad \Gamma \vdash p_i: T \quad \Gamma \vdash e_i: R}{\Gamma \vdash \text{match } t \ \{ \ p_1 \Rightarrow e_1 \mid \dots \mid p_n \Rightarrow e_n \ \} : R}
 $$
 
-This means that:
-- The term being matched (`t`) must have type `T`.
-- Each pattern `p_i` must match against the type `T`.
-- The expression `e_i` associated with each pattern must have the same result type `R`.
-- The patterns must be exhaustive, meaning that all possible forms of the term are covered by the patterns.
+Where:
 
-### Examples
+- The term $t$ being matched must have type $T$.
+- Each pattern $p_i$ must correspond to a value of type $T$.
+- The expression $e_i$ associated with each pattern must return the same type $R$, ensuring uniformity across all branches.
+- The patterns must be exhaustive, covering all possible values of the term $t$. Failing to provide exhaustive patterns would result in a type error, as not all possible values would be handled.
 
-#### Pattern Matching on Algebraic Data Types
+### Example: Boolean Pattern Matching
 
-Consider the `Option` type:
+In the following example, a boolean value is matched against two patterns: `true` and `false`:
 
-```scala
-def getValue[A: 'Type](opt: Option[A], default: A): A = match opt {
-    case Option[A]::Some(x) => x
-    case Option[A]::None => default
-}
+<div class="code-editor" id="code-match-bool">
+
 ```
-
-- This function takes an `Option[A]` and a default value.
-- If the option is `Some(x)`, it returns `x`; if it is `None`, it returns the default value.
-
-#### Exhaustive Matching
-
-Match expressions must cover all possible cases for the type being matched. For example, when matching on `Bool`:
-
-```scala
-def toInt(b: Bool): ℤ = match b with {
+def toInt(b: Bool): ℤ = match b {
     case true => 1
     case false => 0
 }
+
+eval true.toInt  // Result: 1
+eval false.toInt // Result: 0
 ```
+</div>
+<div class="button-container">
+    <button class="md-button button-run" onclick="runCodeInEditor('code-match-bool', 'result-match-bool')">Run Code</button>
+</div>
+<div class="result-editor" id="result-match-bool"></div>
 
-- This function converts a `Bool` value to an integer.
-- Both possible values (`true` and `false`) are covered, making the pattern match exhaustive.
+Here, the match-expression transforms a boolean value into an integer representation by explicitly handling both possible cases of a `Bool` type.
 
+### Pattern Matching on Inductive Types
+
+Pattern matching becomes particularly useful when working with inductive types, which may represent optional values, lists, or other recursively defined structures. Consider the following inductive type `Option`:
+
+<div class="code-editor" id="code-match-option">
+
+```
+type Option[A: 'Type] = inductive {
+    None
+    Some(A)
+}
+
+def getOrDefault[A: 'Type](opt: Option[A], default: A): A = match opt {
+    case Option[A]::Some(x) => x
+    case Option[A]::None => default
+}
+
+eval Option[Int]::Some(114514).getOrDefault[Int](0) // Result: 114514
+eval Option[Int]::None.getOrDefault[Int](0)         // Result: 0
+```
+</div>
+<div class="button-container">
+    <button class="md-button button-run" onclick="runCodeInEditor('code-match-option', 'result-match-option')">Run Code</button>
+</div>
+<div class="result-editor" id="result-match-option"></div>

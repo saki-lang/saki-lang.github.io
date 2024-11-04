@@ -1,5 +1,8 @@
 # Decorator
 
+!!! warning
+    This feature is not yet implemented or not fully supported in the current version of Saki interpreter/REPL.
+
 A **decorator** in **Saki** is a higher-order function that takes another function as its argument and returns a new function with the same type signature. Decorators allow for the dynamic augmentation of functions with additional functionality, enhancing the behavior of the original function without modifying its core logic. In essence, a decorator has the type:
 
 $$

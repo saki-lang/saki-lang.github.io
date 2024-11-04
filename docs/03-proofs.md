@@ -131,7 +131,7 @@ We begin by establishing the formal definitions of equality, reflexivity, and sy
 The equality relation between two elements $a, b$ of a type $A$ is defined as a dependent type $A.Eq(a, b)$, which asserts that $a$ and $b$ are equal. This is expressed using a dependent type $A \to \mathcal{U}$ where $\mathcal{U}$ is the universe of types. Formally, the equality type $A.Eq(a, b)$ is defined as:
 
 $$
-A.Eq(a, b) :\equiv \forall P : (A \to \mathcal{U}), P(a) \to P(b)
+Eq_A(a, b) :\equiv \forall (P : A \to \mathcal{U}) . P(a) \to P(b)
 $$
 
 This means that $A.Eq(a, b)$ holds if, for all propositions $P$ on $A$, whenever $P(a)$ is true, $P(b)$ must also hold. In essence, this defines equality as the ability to substitute $a$ for $b$ in any context described by $P$.
@@ -150,7 +150,7 @@ The property of **reflexivity** asserts that any element $a$ of a type $A$ is eq
 For any element $a \in A$, reflexivity is stated as:
 
 $$
-A.Eq(a, a) :\equiv \forall P : (A \to \mathcal{U}), P(a) \to P(a)
+\text{refl}_A : \forall(a: A) . Eq_A(a, a) :\equiv \lambda (P : A \to \mathcal{U}) . \lambda (p : P(a)) . p
 $$
 
 This is trivially true because the proof $pa : P(a)$ already holds. Reflexivity is defined as:
@@ -158,9 +158,7 @@ This is trivially true because the proof $pa : P(a)$ already holds. Reflexivity 
 <div class="code-editor">
 
 ```
-def refl(A: 'Type, a: A): A.Eq(a, a) = {
-    (P: A -> 'Type, pa: P(a)) => pa
-}
+def refl(A: 'Type, a: A): A.Eq(a, a) = (P: A -> 'Type, p: P(a)) => p
 ```
 </div>
 
@@ -173,7 +171,10 @@ The property of **symmetry** states that if $a = b$, then $b = a$. Formally, giv
 The symmetry of equality is defined as follows:
 
 $$
-A.Eq(b, a) :\equiv \forall P : (A \to \mathcal{U}), P(b) \to P(a)
+\begin{align}
+\text{symm}_A : & \, \forall(a, b: A) . Eq_A(a, b) \to Eq_A(b, a) 
+    \\ & :\equiv \lambda (e_{ab} : Eq_A(a, b)) . e_{ab}(\lambda (b' : A) . Eq_A(b', a), \text{refl}_A(a))
+\end{align}
 $$
 
 Given a proof of $A.Eq(a, b)$, we construct a proof of $A.Eq(b, a)$ by applying $A.Eq(a, b)$ to the proposition $P(b') = A.Eq(b', a)$, and using the reflexivity of $a$. This is formally stated as:

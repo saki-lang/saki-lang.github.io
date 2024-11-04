@@ -128,8 +128,9 @@ export async function runCodeInEditor(codeEditorElementId, resultEditorElementId
         body: JSON.stringify({
             sandbox: "saki",
             command: "run",
-            files: { "": isEval ? "eval " + code : code },
+            files: { "": isEval ? "eval {\n" + code + "\n}" : code },
         }),
+        signal: AbortSignal.timeout(5000)
     }).then(response => response.json()).then(data => {
         resultEditorElement.codeEditor.setValue(data.stdout);
     }).catch(error => {

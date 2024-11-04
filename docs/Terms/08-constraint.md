@@ -1,4 +1,8 @@
-### Contract Universe Terms
+# Constraint Universe
+
+!!! warning
+    This feature is not yet implemented or not fully supported in the current version of Saki interpreter/REPL.
+
 
 In **Saki**, universes are used to organize types into hierarchies, particularly when dealing with **contract universes**, which enforce certain behaviors or constraints on types. A **universe** in Saki is essentially a type whose elements are themselves types, constrained by certain contracts or predicates. This design closely aligns with **Martin-Löf Type Theory (MLTT)**, where universes are structured collections of types that satisfy specific conditions. Contract universes in Saki allow types to declare behaviors through contracts, enforcing rules and conditions on how types interact.
 

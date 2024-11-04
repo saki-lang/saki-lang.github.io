@@ -5,7 +5,7 @@
 <link rel="stylesheet" href="static/styles.css">
 
 !!! warning
-    Saki-lang is currently in a very early stage of design and development, with substantial work required before it reaches a mature state. The prototype interpreter and REPL are still under active development, and no working interpreters are currently available.
+    Saki-lang is currently in a very early stage of design and development, with substantial work required before it reaches a mature state. The prototype interpreter and REPL are still under active development, and many features are not yet implemented or fully supported. The language design and syntax are subject to change based on ongoing research and experimentation.
 
 Saki is a statically typed, pure functional programming language that integrates dependent types and certain object-oriented constructs, including function overloading and algebraic subtyping. Its design emphasizes simplicity, adopting a C-family syntax while employing a sophisticated type system rooted in Martin-Löf Type Theory. Saki introduces novel features, such as [contract universes](Terms/Contract%20Universe.md) and [superposition types](Definition/Function%20Overloading.md), positioning itself as an experimental platform for investigating advanced type system mechanics and program synthesis. Heavily influenced by [Pikelet](https://github.com/pikelet-lang/pikelet) and [MLsub](https://lptk.github.io/programming/2020/03/26/demystifying-mlsub.html), Saki aims to explore new frontiers in type theory and programming paradigms.
 
@@ -273,83 +273,3 @@ eval "The predecessor of 1 is " ++ myTree.predecessor(1).intOptionToString
 ## REPL
 
 <iframe style="width:100%;height:500px" frameborder="0" src="https://repl.saki-lang.tech/"></iframe>
-
-
-## Example: Theorem Prover
-
-<div class="code-editor" id="code-theorem-addzero">
-```
-def Eq(A: 'Type, a b: A): 'Type = ∀(P: A -> 'Type) -> P(a) -> P(b)
-
-def refl(A: 'Type, a: A): A.Eq(a, a) = {
-    (P: A -> 'Type, pa: P(a)) => pa
-}
-
-def symmetry(A: 'Type, a b: A, eqab: A.Eq(a, b)): A.Eq(b, a) = {
-    eqab((b': A) => A.Eq(b', a), A.refl(a))
-}
-
-type ℕ = inductive {
-    Zero
-    Succ(ℕ)
-}
-
-def o: ℕ = ℕ::Zero
-def succ(n: ℕ): ℕ = ℕ::Succ(n)
-
-operator binary (===) left-assoc {
-    looser-than (+)
-}
-
-def (===)(a b: ℕ): 'Type = ℕ.Eq(a, b)
-
-def (+)(a b : ℕ): ℕ = match a {
-    case ℕ::Zero => b
-    case ℕ::Succ(a') => ℕ::Succ(a' + b)
-}
-
-def induction(
-    P: ℕ -> 'Type,
-    base: P(ℕ::Zero),
-    induce: ∀(n: ℕ) -> P(n) -> P(n.succ),
-    nat: ℕ,
-): P(nat) = match nat {
-    case ℕ::Zero => base
-    case ℕ::Succ(n') => induce(n', P.induction(base, induce, n'))
-}
-
-def inductionReduce(
-    a b: ℕ,
-    eqba: Eq(ℕ, b, a),
-    P: ℕ -> 'Type,
-    pa: P(a),
-): P(b) = {
-    let eqab = ℕ.symmetry(b, a, eqba)
-    eqab(P, pa)
-}
-
-def theoremPlusZero: ∀(n: ℕ) -> (n + o === n) = {
-    ((n: ℕ) => ℕ.Eq(n + o, n)).induction(
-        ℕ.refl(ℕ::Zero),
-        (n: ℕ, assumption: (n + o === n)) => {
-            inductionReduce(
-                n, n + o, assumption,
-                (n': ℕ) => (n'.succ === n.succ),
-                ℕ.refl(n.succ)
-            )
-        }
-    )
-}
-
-eval theoremPlusZero
-```
-</div>
-
-<div class="button-container">
-    <button class="md-button button-run" onclick="runCodeInEditor('code-theorem-addzero', 'result-theorem-addzero')">Run Example</button>
-</div>
-
-<div class="result-editor" id="result-theorem-addzero"></div>
-
-
-
