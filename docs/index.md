@@ -7,7 +7,7 @@
 !!! warning
     Saki-lang is currently in a very early stage of design and development, with substantial work required before it reaches a mature state. The prototype interpreter and REPL are still under active development, and many features are not yet implemented or fully supported. The language design and syntax are subject to change based on ongoing research and experimentation.
 
-Saki is a statically typed, pure functional programming language that integrates dependent types and certain object-oriented constructs, including function overloading and algebraic subtyping. Its design emphasizes simplicity, adopting a C-family syntax while employing a sophisticated type system rooted in Martin-Löf Type Theory. Saki introduces novel features, such as [contract universes](Terms/Contract%20Universe.md) and [superposition types](Definition/Function%20Overloading.md), positioning itself as an experimental platform for investigating advanced type system mechanics and program synthesis. Heavily influenced by [Pikelet](https://github.com/pikelet-lang/pikelet) and [MLsub](https://lptk.github.io/programming/2020/03/26/demystifying-mlsub.html), Saki aims to explore new frontiers in type theory and programming paradigms.
+Saki is a dependently-typed, pure functional language with algebraic subtyping and overloaded superposition types.  It prioritizes simplicity in design, using a Scala-inspired syntax while leveraging a type system grounded in Martin-Löf Type Theory. Saki introduces novel features like constraint universes and superposition types, serving as a research platform for exploring advanced type systems and verified program synthesis.
 
 ## Playground
 
