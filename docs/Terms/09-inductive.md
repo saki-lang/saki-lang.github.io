@@ -77,8 +77,8 @@ In this definition:
 
 ```
 type Option(A: 'Type) = inductive {
-    None : this          // 'this' refers to 'Option(A)'
-    Some : A → this      // 'Some' takes an 'A' and returns 'Option(A)'
+    None : this         // 'this' refers to 'Option(A)'
+    Some : A -> this    // 'Some' takes an 'A' and returns 'Option(A)'
 }
 ```
 </div>

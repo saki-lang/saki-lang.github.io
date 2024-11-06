@@ -1,4 +1,7 @@
-# Dependent Type
+# Dependent Pi (Function) Type
+
+<script type="module" src="/javascripts/editor.js"></script>
+<link rel="stylesheet" href="/static/styles.css">
 
 Dependent types generalize function types by allowing the result type to depend on the input value. This capability enables richer type systems where the type returned by a function can vary based on its argument.
 
@@ -6,7 +9,7 @@ Dependent types generalize function types by allowing the result type to depend 
 
 Dependent types are expressed in terms of $\Pi$-types (Pi-types), which describe functions where the return type is dependent on the actual input value. The syntax for dependent function types in Saki is:
 
-```scala
+```
 PiTypeSymbol    ::= ‘forall’ | ‘Π’ | ‘∀’
 DepFuncType     ::= PiTypeSymbol ‘(’ Ident ‘:’ Term ‘)’ ‘->’ Term
 ```

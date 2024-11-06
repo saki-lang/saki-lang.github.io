@@ -1,8 +1,7 @@
 # Sum Type
 
-## Syntax
-
-# Sum Type Terms
+<script type="module" src="/javascripts/editor.js"></script>
+<link rel="stylesheet" href="/static/styles.css">
 
 Sum types (also known as disjoint union types or variant types) are one of the key constructs in type theory for expressing a choice between different types. A sum type allows a value to be one of several distinct types. 
 
@@ -14,7 +13,7 @@ In **Saki**, sum types are written using the vertical bar (`|`) symbol to denote
 SumTypeTerm     ::= Term ‘|’ Term
 ```
 
-This means that a value of type `A | B` can be either a value of type `A` or a value of type `B`. The sum type is closed and disjoint, meaning the value must belong to one of the specified types and not both simultaneously. This is distinct from intersection types where values must belong to all specified types.
+This means that a value of type $(A \mid B)$ can be either a value of type $A$ or a value of type $B$. The sum type is closed and disjoint, meaning the value must belong to one of the specified types and not both simultaneously. This is distinct from intersection types where values must belong to all specified types.
 
 ## Typing Rules for Sum Types
 
@@ -60,67 +59,100 @@ The subtyping rules for sum types are based on the notion of type containment an
 
 ### Basic Sum Type
 
-Consider a sum type representing a value that can either be an integer (`ℤ`) or a string:
+Consider a sum type representing a value that may either be an integer ($\mathbb{Z}$) or a string:
+
+<div class="code-editor">
 
 ```
-ℤ | String
+(ℤ | String)
 ```
+</div>
 
-The type `ℤ | String` means that a value of this type can either be an integer or a string. For example, the following are valid values of type `ℤ | String`:
+The type $(ℤ \mid String)$ specifies that a value can either be an integer or a string. Valid values for this type include:
+
+<div class="code-editor">
 
 ```
-42 : ℤ | String
-"Hello" : ℤ | String
+42 : (ℤ | String)
+"Hello" : (ℤ | String)
 ```
+</div>
 
 ### Sum Type with Subtyping
 
-Now, assume that `ℕ` is a subtype of `ℤ` (natural numbers are a subtype of integers). If we define a sum type:
+Suppose `Dog` is a subtype of `Animal`. If we define a sum type:
+
+<div class="code-editor">
 
 ```
-ℕ | String
+(Dog | String)
 ```
+</div>
 
-Based on the subtyping rule for sum types, we can infer that:
+Using the covariant subtyping rule, we conclude:
+
+<div class="code-editor">
 
 ```
-ℕ | String <: ℤ | String
+(Animal | String) <: (Dog | String)
 ```
+</div>
 
-This follows the first rule (covariant subtyping), where `ℕ <: ℤ`. Therefore, a sum type that contains `ℕ` as one of its components is a subtype of a sum type containing `ℤ` in the corresponding position.
+Since `Dog <: Animal`, the sum type containing `Dog` is a subtype of one containing `Animal` in the corresponding position.
 
 ### Covariance in Function Return Types
 
-Sum types often appear as return types in functions. For example, consider a function that either returns an integer or an error message (represented as a string):
+Sum types frequently appear as return types in functions. Consider a function that may return either a `Dog` instance or an error message (as a string):
+
+<div class="code-editor">
 
 ```
-def resultFunction(): ℤ | String = { ... }
+def resultFunction(): (Dog | String) = { ... }
 ```
+</div>
 
-The return type of this function is `ℤ | String`, indicating that it can return either an integer (successful result) or a string (error message). Since `ℕ <: ℤ`, if this function were modified to return `ℕ | String`, it would still be a valid subtype:
+This function’s return type can also be expressed as `Animal | String` since `Dog <: Animal`. Replacing the return type with `Animal | String` is valid:
+
+<div class="code-editor">
 
 ```
-def resultFunction(): ℕ | String = { ... }
+def resultFunction(): (Animal | String) = { ... }
 ```
+</div>
 
-This works because of the covariance in the sum type, allowing a subtype (`ℕ`) to be returned where a supertype (`ℤ`) is expected.
+Covariance permits the substitution of a subtype (`Dog`) for a supertype (`Animal`) in the return type.
 
 ### Sum Types in Pattern Matching
 
-Sum types are particularly useful in pattern matching scenarios. Suppose we define a type representing either a boolean or an integer:
+Sum types are particularly advantageous in pattern matching. For example, consider a type representing a boolean, an integer, or a string:
+
+<div class="code-editor">
 
 ```
-Bool | ℤ
+(Bool | ℤ | String)
 ```
+</div>
 
-In a function, we can pattern match on this sum type:
+In a function, we can match against this sum type:
+
+<div class="code-editor" id="code-sum-pattern-matching">
 
 ```
-def handleValue(value: Bool | ℤ): String = match value {
-      case true => "It is true!"
-      case false => "It is false!"
-      case n: ℤ => "It is the integer: ${n}"
+def describeValue(value: (Bool | ℤ | String)): String = match value {
+    case true => "It's true!"
+    case false => "It's false!"
+    case n: ℤ => "It's an integer: " ++ n.toString ++ "!"
+    case s: String => "It's " ++ s ++ "!!!!!"
 }
-```
 
-Here, the type `Bool | ℤ` allows the function to accept either a boolean or an integer, and we can handle each case appropriately using pattern matching.
+eval describeValue 2024     // Output: "It's an integer: 2024!"
+eval describeValue true     // Output: "It's true!"
+eval describeValue "mygo"   // Output: "It's mygo!!!!!"
+```
+</div>
+<div class="button-container">
+    <button class="md-button button-run" onclick="runCodeInEditor('code-sum-pattern-matching', 'output-sum-pattern-matching')">Run Code</button>
+</div>
+<div class="result-editor" id="output-sum-pattern-matching"></div>
+
+Here, the type $(Bool \mid ℤ \mid String)$ allows the function to process each type individually, and we can handle each case appropriately with pattern matching.
