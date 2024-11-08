@@ -1,4 +1,4 @@
-# Function Overloading
+# Ad-Hoc Polymorphism (Overloading)
 
 <script type="module" src="/javascripts/editor.js"></script>
 <link rel="stylesheet" href="/static/styles.css">
@@ -156,3 +156,73 @@ Here, the overloaded function `concat`:
 
 - Concatenates numbers when passed two integers using mathematical operations.
 - Concatenates strings when passed two strings using built-in string concatenation.
+
+### Currying with Overloaded Functions
+
+Due to the nature of superposition types, overloaded functions are curried as well like regular functions. 
+This allows for partial application and dynamic resolution of the function's behavior based on the arguments provided.
+
+Consider the following example:
+
+<div class="code-editor" id="code-overloading-curry">
+
+```
+def ceilDec(x: Int): Int = if x == 0 then 1 else 10 * ceilDec(x / 10)
+def concat(a: Int, b: Int): Int = a * ceilDec(b) + b
+def concat(x: String, y: String): String = x ++ y
+
+eval concat 123
+eval concat "Hello! "
+```
+</div>
+<div class="button-container">
+    <button class="md-button button-run" onclick="runCodeInEditor('code-overloading-curry', 'output-overloading-curry')">Run Code</button>
+</div>
+<div class="output-container" id="output-overloading-curry"></div>
+
+Here, `concat` can be partially applied to an integer or string, with its final behavior determined by the type of the subsequent argument. Specifically, applying an overloaded lambda to an argument invokes a selection process based on the argument’s type, identifying the corresponding function branch. This type-based selection mechanism is termed "**measurement**" of an overloaded lambda, analogous to quantum state measurement, where an indeterminate superposed state collapses into a definite outcome upon observation.
+
+
+
+### Why Superposition Types?
+
+Superposition types in **Saki** elegantly combine **function overloading** (ad-hoc polymorphism) with **currying**, overcoming challenges that typically arise when attempting to integrate these concepts in functional programming languages.
+
+In many functional programming languages, **currying** and **function overloading** can clash. Currying, which allows functions to be partially applied, introduces ambiguity when combined with overloading. For instance, in a curried function, the compiler may struggle to determine which version of an overloaded function to apply based on partial arguments, leading to errors.
+
+A typical example of this issue occurs in **Scala**, where the following code results in an **ambiguous overload** error:
+
+<div class="code-editor">
+
+```
+def appendToString(s: String)(x: Int): String = s + x
+def appendToString(s: String)(x: String): String = s + x
+def test = appendToString("foo")
+```
+</div>
+
+In this case, the compiler cannot decide whether to apply `appendToString("foo")(Int)` or `appendToString("foo")(String)`, because both are valid overloads. The argument `"foo"` is a `String`, but it could be followed by either an `Int` or a `String`, causing ambiguity.
+However, **Saki** addresses this problem through **superposition types**. A superposition type, such as `A ⊕ B`, enables a function to handle multiple types dynamically and resolve overloading in a way that is both type-safe and flexible.
+When **superposition types** are used in conjunction with **currying**, the function can accept and handle different argument types across different stages of application without ambiguity. In Saki, the curried function `appendToString` would look like this:
+
+<div class="code-editor" id="code-overloading-ambiguous">
+
+```
+def appendToString(s: String, x: Int): String = s ++ x.toString
+def appendToString(s: String, x: String): String = s ++ x
+eval appendToString "foo"
+```
+</div>
+
+<div class="button-container">
+    <button class="md-button button-run" onclick="runCodeInEditor('code-overloading-ambiguous', 'output-overloading-ambiguous')">Run Code</button>
+</div>
+<div class="output-container" id="output-overloading-ambiguous"></div>
+
+Here, the superposition type ensures that the function can adapt its behavior based on the next argument type—whether it’s an `Int` or a `String`. The type of the partial application `appendToString("foo")` would be:
+
+$$
+(Int \to String) \oplus (String \to String)
+$$
+
+This means that **Saki**’s type system can resolve the correct overload dynamically based on the second argument’s type, thus avoiding the ambiguity.

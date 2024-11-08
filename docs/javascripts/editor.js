@@ -120,6 +120,10 @@ export async function runCodeInEditor(codeEditorElementId, resultEditorElementId
     let code = codeEditorElement.codeEditor.getValue();
     resultEditorElement.codeEditor.setValue("Running...");
     resultEditorElement.style.display = "flex";
+    await runCode(code, resultEditorElement, 1, isEval);
+}
+
+async function runCode(code, resultEditor, retries, isEval = false) {
     fetch("https://api.saki-lang.tech/v1/exec", {
         method: "POST",
         headers: {
@@ -130,11 +134,15 @@ export async function runCodeInEditor(codeEditorElementId, resultEditorElementId
             command: "run",
             files: { "": isEval ? "eval {\n" + code + "\n}" : code },
         }),
-        signal: AbortSignal.timeout(5000)
+        signal: AbortSignal.timeout(7000)
     }).then(response => response.json()).then(data => {
-        resultEditorElement.codeEditor.setValue(data.stdout);
+        resultEditor.codeEditor.setValue(data.stdout);
     }).catch(error => {
-        resultEditorElement.codeEditor.setValue(error.message);
+        if (retries > 0) {
+            runCode(code, resultEditor, retries - 1, isEval);
+        } else {
+            resultEditor.codeEditor.setValue("Failed to send execution request to the server, please retry later: " + error.message);
+        }
     });
 }
 

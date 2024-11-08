@@ -7,7 +7,7 @@
 !!! warning
     Saki-lang is currently in a very early stage of design and development, with substantial work required before it reaches a mature state. The prototype interpreter and REPL are still under active development, and many features are not yet implemented or fully supported. The language design and syntax are subject to change based on ongoing research and experimentation.
 
-Saki is a dependently-typed, pure functional language with algebraic subtyping and overloaded superposition types.  It prioritizes simplicity in design, using a Scala-inspired syntax while leveraging a type system grounded in Martin-Löf Type Theory. Saki introduces novel features like constraint universes and superposition types, serving as a research platform for exploring advanced type systems and verified program synthesis.
+**Saki** is a **dependently-typed**, **pure functional** programming language that supports **algebraic subtyping** and **ad-hoc polymorphism**. It prioritizes simplicity in design, using a Scala-inspired syntax while leveraging a type system grounded in Martin-Löf Type Theory. Saki introduces novel features like constraint universes and superposition types, serving as a research platform for exploring advanced type systems and verified program synthesis.
 
 ## Playground
 
