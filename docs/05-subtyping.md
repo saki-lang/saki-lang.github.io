@@ -1,6 +1,9 @@
 
 # Subtyping and Algebraic Subtyping
 
+<script type="module" src="/javascripts/editor.js"></script>
+<link rel="stylesheet" href="/static/styles.css">
+
 Subtyping is mathematically represented as a subset relation, \( A \subseteq B \), such that \( \forall t \in A, t \in B \). This interpretation allows subtyping to reflect a preorder relation, which becomes a partial order under equivalence (\( A \leq B \land B \leq A \implies A = B \)). The introduction of least upper bounds (lub, \( A \sqcup B \)) and greatest lower bounds (glb, \( A \sqcap B \)) converts this structure into a lattice. When combined with the universal top type (\( \top \)) and bottom type (\( \bot \)), the lattice becomes bounded, satisfying:
 
 $$
@@ -93,14 +96,40 @@ $$
 
 This states that the intersection of function types corresponds to the union of parameter types and the intersection of return types.
 
+For example:
+
+<div class="code-editor" id="code-union-dist">
+
+```
+(Int -> String) & (Float -> Bool)
+```
+</div>
+<div class="button-container">
+    <button class="md-button button-run" onclick="runCodeInEditor('code-union-dist', 'output-union-dist', true)">Run Example</button>
+</div>
+<div id="output-union-dist" class="result-editor"></div>
+
+Similarly, the union of function types results from the intersection of parameter types and the union of return types.
+
 $$
 (A_1 \to B_1) \sqcup (A_2 \to B_2) = (A_1 \sqcap A_2) \to (B_1 \sqcup B_2)
 $$
 
-Similarly, the union of function types results from the intersection of parameter types and the union of return types.
+For example:
+<div class="code-editor" id="code-intersection-dist">
+
+```
+(Int -> String) | (Float -> Bool)
+```
+</div>
+<div class="button-container">
+    <button class="md-button button-run" onclick="runCodeInEditor('code-intersection-dist', 'output-intersection-dist', true)">Run Example</button>
+</div>
+<div id="output-intersection-dist" class="result-editor"></div>
+
 
 ## Records
-Subtyping for record types aligns with structural subtyping, allowing more permissive views:
+Subtyping for record types aligns with structural subtyping, where records are compatible if they share the same fields and types. The typing rule for record types is:
 
 $$
 \begin{align}
@@ -153,8 +182,59 @@ $$
 
 
 
+### Union and Intersection Rules for Record Types
+
+In algebraic subtyping, **union** (\( \sqcup \)) and **intersection** (\( \sqcap \)) types can also be extended to **record types**. These operations allow record subtyping to support partial and combined views of records, ensuring compatibility and flexibility in handling structured data.
+
+#### Union of Record Types
+The union of two record types combines their fields, allowing overlapping fields to resolve to the union of their respective types:
+
+$$
+\{\overline{l_i : A_i}^{i \in S}\} \sqcup \{\overline{l_i : B_i}^{i \in T}\} = \{\overline{l_i : A_i \sqcup B_i}^{i \in S \cap T}, \overline{l_j : A_j}^{j \in S \setminus T}, \overline{l_k : B_k}^{k \in T \setminus S}\}
+$$
+
+- For shared fields \( l_i \in S \cap T \), the resulting type is the union of their individual types \( A_i \sqcup B_i \).
+- For fields exclusive to one record (e.g., \( l_j \in S \setminus T \) or \( l_k \in T \setminus S \)), their types remain unchanged.
+
+For example:
+
+<div class="code-editor" id="code-union-record">
+
+```
+(record { a: Int; b: String }) | (record { b: Float; c: Bool })
+```
+</div>
+
+<div class="button-container">
+    <button class="md-button button-run" onclick="runCodeInEditor('code-union-record', 'output-union-record', true)">Run Example</button>
+</div>
+<div id="output-union-record" class="result-editor"></div>
 
 
+#### Intersection of Record Types
+The intersection of two record types combines their fields similarly, but overlapping fields resolve to the intersection of their types:
+
+$$
+\{\overline{l_i : A_i}^{i \in S}\} \sqcap \{\overline{l_i : B_i}^{i \in T}\} = \{\overline{l_i : A_i \sqcap B_i}^{i \in S \cap T}\}
+$$
+
+- Only fields common to both records (\( l_i \in S \cap T \)) are preserved in the resulting record.
+- For shared fields, the resulting type is the intersection of their individual types \( A_i \sqcap B_i \).
+- Fields exclusive to one record are excluded from the intersection.
+
+For example:
+
+<div class="code-editor" id="code-intersect-record">
+
+```
+(record { a: Int; b: String }) & (record { b: String; c: Bool })
+```
+</div>
+
+<div class="button-container">
+    <button class="md-button button-run" onclick="runCodeInEditor('code-intersect-record', 'output-intersect-record', true)">Run Example</button>
+</div>
+<div id="output-intersect-record" class="result-editor"></div>
 
 
 
