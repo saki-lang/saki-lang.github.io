@@ -10,6 +10,18 @@ $$
 \forall T, \ T \leq \top \quad \text{and} \quad  \forall T, \ \bot \leq T
 $$
 
+## The Subsumption Rule
+
+In a type system with subtyping, a type \( A \) can be considered a **subtype** of another type \( B \) if \( A \) satisfies all the constraints and properties of \( B \), and possibly some additional ones. The subsumption rule formalizes this idea by allowing expressions of a more specific type to be treated as expressions of a more general type.
+
+The subsumption rule can be expressed as:
+
+\[
+\frac{A \leq B \quad \Gamma \vdash e : A}{\Gamma \vdash e : B}
+\]
+
+This means that if we have an expression \( e \) of type \( A \), and we know that \( A \) is a subtype of \( B \) (denoted \( A \leq B \)), then we can treat \( e \) as an expression of type \( B \) without any further checks.
+
 ## Basic Subtype Relationships
 
 ### Reflexivity of Subtyping
@@ -239,15 +251,47 @@ For example:
 
 
 
+## Subtyping for Recursive Type
 
-
-
+$$
+\frac{
+\Gamma \vdash T : \mathcal{U} \quad \Gamma, x : T \vdash \sigma \leq T
+}{
+\Gamma \vdash \mu (x : T) . \sigma \leq T
+}
+$$
 
 
 
 ## Dependent Types
 
 Dependent types extend the expressive power of type systems by allowing types to depend on values or other types. Algebraic subtyping supports dependent types, incorporating union and intersection constructs to define relationships between dependent types effectively.
+
+### Subtyping Relationships
+
+#### Dependent $\Pi$-Type
+
+The dependent $\Pi$-type rule for subtyping is given by:
+
+$$
+\frac{
+\Gamma \vdash A_2 \leq A_1 \quad \Gamma, x:A_1 \vdash B_1(x) \quad \Gamma, x:A_2 \vdash B_1(x) \leq B_2(x)
+}{
+\Gamma \vdash \Pi(x:A_1). B_1(x) \leq \Pi(x:A_2). B_2(x)
+}
+$$
+
+#### Dependent $\Sigma$-Type
+
+The dependent $\Sigma$-type rule for subtyping is given by:
+
+$$
+\frac{
+\Gamma \vdash A_1 \leq A_2 \quad \Gamma, x:A_1 \vdash B_1(x) \leq B_2(x)
+}{
+\Gamma \vdash \Sigma(x:A_1). B_1(x) \leq \Sigma(x:A_2). B_2(x)
+}
+$$
 
 ### Intersection of Dependent \( \Pi \)-Types
 
@@ -273,15 +317,15 @@ $$
 }
 $$
 
-#### Subtyping Rule for Intersection of Dependent \( \Pi \)-Types
+#### Type Formation Rule for Intersection of Dependent \( \Sigma \)-Types
 
-Subtyping for dependent \( \Pi \)-types follows:
+Dependent \( \Sigma \)-types represent dependent pairs, where the type of the second component depends on the value of the first. The intersection of such types is defined as:
 
 $$
 \frac{
-\Gamma \vdash A_2 \leq A_1 \quad \Gamma \vdash B_1(x) \leq B_2(x) \quad \Gamma \vdash B_2(x) \leq B_1(x)
+\Gamma \vdash A_1 : \mathcal{U} \quad \Gamma \vdash A_2 : \mathcal{U} \quad \Gamma, x:A_1 \vdash B_1(x) : \mathcal{U} \quad \Gamma, x:A_2 \vdash B_2(x) : \mathcal{U}
 }{
-\Gamma \vdash \Pi(x : A_1). B_1(x) \cap \Pi(x : A_2). B_2(x) \leq \Pi(x : A_2). B_2(x)
+\Gamma \vdash \Sigma(x:A_1). B_1(x) \cap \Sigma(x:A_2). B_2(x) : \mathcal{U}
 }
 $$
 
@@ -289,88 +333,25 @@ $$
 
 #### Type Formation Rule for Union of Dependent \( \Pi \)-Types
 
-For unions of dependent \( \Pi \)-types, a sum type representation is used:
-
-$$
-\Pi(x : A_1). B_1(x) \cup \Pi(x : A_2). B_2(x) \equiv \text{inl}(\Pi(x : A_1). B_1(x)) \cup \text{inr}(\Pi(x : A_2). B_2(x))
-$$
-
-Where \( \text{inl} \) and \( \text{inr} \) represent injections into the left and right components.
-
-#### Typing Rule
-
-A term \( f \) of either constituent type satisfies:
+The union of dependent \( \Pi \)-types combines the domains and codomains of the respective types:
 
 $$
 \frac{
-\Gamma \vdash f : \Pi(x : A_1). B_1(x)
+\Gamma \vdash A_1 : \mathcal{U} \quad \Gamma \vdash A_2 : \mathcal{U} \quad \Gamma, x:A_1 \vdash B_1(x) : \mathcal{U} \quad \Gamma, x:A_2 \vdash B_2(x) : \mathcal{U}
 }{
-\Gamma \vdash f : \Pi(x : A_1). B_1(x) \cup \Pi(x : A_2). B_2(x)
-}
-\quad \text{or} \quad
-\frac{
-\Gamma \vdash f : \Pi(x : A_2). B_2(x)
-}{
-\Gamma \vdash f : \Pi(x : A_1). B_1(x) \cup \Pi(x : A_2). B_2(x)
+\Gamma \vdash \Pi(x:A_1). B_1(x) \cup \Pi(x:A_2). B_2(x) : \mathcal{U}
 }
 $$
-
-#### Subtyping Rule for Union of Dependent \( \Pi \)-Types
-
-Subtyping ensures inclusion and equivalence between unions and their constituents:
-
-$$
-\frac{
-\Gamma \vdash \Pi(x : A_1). B_1(x) \leq \Pi(x : A_1). B_1(x) \cup \Pi(x : A_2). B_2(x)
-}{
-\Gamma \vdash \Pi(x : A_1). B_1(x) \cup \Pi(x : A_2). B_2(x) \leq \Pi(x : A_1). B_1(x)
-}
-$$
-
-A similar rule applies for the second component of the union.
-
-### Intersection of Dependent \( \Sigma \)-Types
-
-#### Type Formation Rule for Intersection of Dependent \( \Sigma \)-Types
-
-For dependent \( \Sigma \)-types, intersections represent the set of pairs satisfying constraints for both components:
-
-$$
-\Sigma(x : A_1). B_1(x) \cap \Sigma(x : A_2). B_2(x) \equiv \Sigma(x : A_1 \cap A_2). (B_1(x) \cap B_2(x))
-$$
-
-#### Subtyping Rule for Intersection of Dependent \( \Sigma \)-Types
-
-The subtyping rule for intersected \( \Sigma \)-types is:
-
-$$
-\frac{
-\Gamma \vdash A_2 \leq A_1 \quad \Gamma \vdash B_1(x) \leq B_2(x) \quad \Gamma \vdash B_2(x) \leq B_1(x)
-}{
-\Gamma \vdash \Sigma(x : A_1). B_1(x) \cap \Sigma(x : A_2). B_2(x) \leq \Sigma(x : A_2). B_2(x)
-}
-$$
-
-### Union of Dependent \( \Sigma \)-Types
 
 #### Type Formation Rule for Union of Dependent \( \Sigma \)-Types
 
-Unions of dependent \( \Sigma \)-types follow a sum-type structure:
-
-$$
-\Sigma(x : A_1). B_1(x) \cup \Sigma(x : A_2). B_2(x) \equiv \text{inl}(\Sigma(x : A_1). B_1(x)) \cup \text{inr}(\Sigma(x : A_2). B_2(x))
-$$
-
-Here, \( \text{inl} \) and \( \text{inr} \) designate the left and right components.
-
-#### Typing Rule
-
-Subtyping for unions of \( \Sigma \)-types maintains compatibility:
+The union of dependent \( \Sigma \)-types combines the types of the first and second components:
 
 $$
 \frac{
-\Gamma \vdash (a, b) : \Sigma(x : A_1). B_1(x)
+\Gamma \vdash A_1 : \mathcal{U} \quad \Gamma \vdash A_2 : \mathcal{U} \quad \Gamma, x:A_1 \vdash B_1(x) : \mathcal{U} \quad \Gamma, x:A_2 \vdash B_2(x) : \mathcal{U}
 }{
-\Gamma \vdash (a, b) : \Sigma(x : A_1). B_1(x) \cup \Sigma(x : A_2). B_2(x)
+\Gamma \vdash \Sigma(x:A_1). B_1(x) \cup \Sigma(x:A_2). B_2(x) : \mathcal{U}
 }
 $$
+

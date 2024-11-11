@@ -1,31 +1,3 @@
-
-# Introduction
-
-<script type="module" src="javascripts/editor.js"></script>
-<link rel="stylesheet" href="static/styles.css">
-
-!!! warning
-    Saki-lang is currently in a very early stage of design and development, with substantial work required before it reaches a mature state. The prototype interpreter and REPL are still under active development, and many features are not yet implemented or fully supported. The language design and syntax are subject to change based on ongoing research and experimentation.
-
-**Saki** is a **dependently-typed**, **pure functional** programming language that supports **algebraic subtyping** and **ad-hoc polymorphism**. It prioritizes simplicity in design, using a Scala-inspired syntax while leveraging a type system grounded in Martin-Löf Type Theory. Saki introduces novel features like constraint universes and superposition types, serving as a research platform for exploring advanced type systems and verified program synthesis.
-
-## Playground
-
-This interactive code playground allows you to write and run Saki code snippets directly in this website. Select a sample program from the dropdown menu or write your own code to experiment with the Saki language.
-
-<div style="margin-bottom: 15px">
-
-<select id="code-playground-dropdown" class="md-button button-run" style="width: min-content">
-  <option value="hello">Example Code: Hello World</option>
-  <option value="mltt" selected>Example Code: Martin-Löf Type Theory Type Checker</option>
-  <option value="rbtree">Example Code: Red-Black Tree</option>
-  <option value="natproof">Example Code: Formal Proof of Peano Number</option>
-</select>
-</div>
-
-<div class="playground-editor" id="code-playground">
-
-```
 /**
  * This code implements a simple type checker and evaluator for Martin-Löf Type Theory (MLTT).
  *
@@ -562,14 +534,3 @@ eval {
     )
     one.pretty ++ "  ≡  " ++ prelude.normalize(one).pretty
 }
-```
-</div>
-<div class="button-container">
-    <button class="md-button button-run" onclick="runCodeInEditor('code-playground', 'result-playground')">Run Code</button>
-</div>
-<div class="result-editor" id="result-playground"></div>
-
-
-## REPL
-
-<iframe style="width:100%;height:500px" frameborder="0" src="https://repl.saki-lang.tech/"></iframe>

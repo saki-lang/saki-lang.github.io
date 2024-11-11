@@ -42,11 +42,30 @@ This rule governs the application of overloaded functions. If a function `f` has
 #### Subtyping for Superposition Types
 
 $$
-(A \sqcup B) <: (A \oplus B)
+(A \oplus B) \leq (A \sqcap B)
 $$
 
-This rule states that a sum type $A \sqcup B$, which represents an exclusive choice between `A` and `B`, is a subtype of the corresponding superposition type $A \oplus B$. Superposition types provide more flexibility, allowing the function’s behavior to be dynamically resolved based on the context.
+The superposition type $A \oplus B$ is a subtype of the intersection type $A \sqcap B$.
+This rule comes from the property of an intersection type:
 
+$$
+(A_1 \to B_1) \sqcap (A_2 \to B_2) \equiv (A_1 \sqcup A_2) \to (B_1 \sqcap B_2)
+$$
+
+A superposition type $(A_1 \to B_1) \sqcap (A_2 \to B_2)$ yields $B_1$ when applied to $A_1$ and $B_2$ when applied to $A_2$. The input type satisfies $A_1 \geq A_1 \sqcup A_2$ and $A_2 \geq A_1 \sqcup A_2$, and the output type satisfies $B_1 \leq B_1 \sqcap B_2$ and $B_2 \leq B_1 \sqcap B_2$.
+And because the covariance of the input type and the contravariance of the output type:
+
+$$
+\begin{align}
+\begin{array}{c}
+\Gamma \vdash A_1 \geq B_1 \quad A_2 \leq B_2
+\\\hline
+\Gamma \vdash A_1 \rightarrow A_2 \leq B_1 \rightarrow B_2
+\end{array}
+\end{align}
+$$
+
+Thus, the superposition type is considered as a subtype of the intersection type.
 
 ## Function Application with Overloading
 
@@ -181,8 +200,6 @@ eval concat "Hello! "
 <div class="output-container" id="output-overloading-curry"></div>
 
 Here, `concat` can be partially applied to an integer or string, with its final behavior determined by the type of the subsequent argument. Specifically, applying an overloaded lambda to an argument invokes a selection process based on the argument’s type, identifying the corresponding function branch. This type-based selection mechanism is termed "**measurement**" of an overloaded lambda, analogous to quantum state measurement, where an indeterminate superposed state collapses into a definite outcome upon observation.
-
-
 
 ### Why Superposition Types?
 

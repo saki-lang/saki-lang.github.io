@@ -147,3 +147,16 @@ async function runCode(code, resultEditor, retries, isEval = false) {
 }
 
 window.runCodeInEditor = runCodeInEditor;
+
+// Playground specific code
+
+document.getElementById('code-playground-dropdown').addEventListener('change', function() {
+    const selected = this.value;
+    fetch(`/examples/${selected}.saki`)
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById('code-playground').codeEditor.setValue(data);
+        });
+});
+
+
