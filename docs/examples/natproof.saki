@@ -97,3 +97,16 @@ def theoremPlusComm: ∀(a: ℕ) -> ∀(b: ℕ) -> (a + b === b + a) = {
         }, a
     )
 }
+
+eval "∀(n: ℕ), n + 0 = n"
+eval theoremPlusZero
+
+eval ""
+
+eval "∀(a b : ℕ), S(a + b) = a + S(b)"
+eval theoremPlusSucc
+
+eval ""
+
+eval "∀(a b : ℕ), a + b = b + a"
+eval theoremPlusComm
