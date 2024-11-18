@@ -42,7 +42,7 @@ This rule governs the application of overloaded functions. If a function `f` has
 #### Subtyping for Superposition Types
 
 $$
-(A \oplus B) \leq (A \sqcap B)
+(A \sqcap B) \leq (A \oplus B)
 $$
 
 The superposition type $A \oplus B$ is a subtype of the intersection type $A \sqcap B$.
