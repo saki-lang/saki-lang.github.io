@@ -1,0 +1,50 @@
+.monaco-editor {
+    outline: none;
+    border: 0px !important;
+}
+
+.editor-wrapper, .monaco-editor, .editor-wrapper, .overflow-guard { 
+    border-radius: 8px !important; 
+}
+
+.code-editor {
+    height: auto;
+    width: 100%;
+    /* overflow-y: visible; */
+}
+
+.playground-editor {
+    width: 100%;
+    height: 800px;
+}
+
+.code-editor > .monaco-editor .cursors-layer > .cursor {
+    display: none !important;
+}
+
+.result-editor {
+    height: auto;
+    width: 100%;
+    overflow-y: visible;
+}
+
+.result-editor > .monaco-editor .cursors-layer > .cursor {
+    display: none !important;
+}
+
+.button-run {
+    padding: 0;
+    width: 150px;
+    height: auto;
+    font-size: 0.6em;
+    align-items: center;
+    justify-content: center;
+}
+
+.button-container {
+    padding: 1% 2%;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: flex-end;
+}

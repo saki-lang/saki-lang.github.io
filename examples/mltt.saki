@@ -1,0 +1,536 @@
+/**
+ * This code implements a simple type checker and evaluator for Martin-Löf Type Theory (MLTT).
+ *
+ * MLTT is a constructive type theory foundational to many proof assistants and dependently
+ * typed programming languages, such as Agda (MLTT) and Coq (CIC).
+ *
+ * In MLTT, types depend on values, leading to a system where functions can accept types
+ * as parameters and return types as results. Key concepts include:
+ * - Dependent Function Types (Pi Types): Generalizations of function types where the
+ *   return type depends on the input value.
+ * - Lambda Abstractions: Anonymous functions defined by specifying parameters and body.
+ * - Universes: A hierarchy of types (e.g., `Type(0)`, `Type(1)`, etc.).
+ *
+ * This implementation models core constructs of MLTT, including terms, values, environments,
+ * evaluation, type inference, and normalization.
+ */
+
+/**
+ * Extracts the value from an `Option[A]`. Throws an error if the option is `None`.
+ * @param <A> Type of the value.
+ * @param option The `Option` instance.
+ * @return The extracted value of type `A`.
+ */
+type Option[A: 'Type] = inductive {
+    None        // Represents the absence of a value.
+    Some(A)     // Wraps a value of type A.
+}
+
+/**
+ * Extracts the value from an `Option[A]`. Throws an error if the option is `None`.
+ * @param <A> Type of the value.
+ * @param option The `Option` instance.
+ * @return The extracted value of type `A`.
+ */
+def unwrap[A: 'Type](option: Option[A]): A = match option {
+    case Option[A]::None => panic("Unwrapping a none option type")
+    case Option[A]::Some(value) => value
+}
+
+/**
+ * `Term` represents the syntax of expressions in MLTT. Each constructor corresponds
+ * to a syntactic category.
+ */
+type Term = inductive {
+    // Variable: Represents a variable identified by its name.
+    Var(String)
+    // Universe Level: Represents types at a certain universe level.
+    Type(Int)
+    // Dependent Pi Type: `Π(x : A). B`, where `B` may depend on `x`.
+    Pi(String, Term, Term)
+    // Lambda Term: `λ(x : A). t`.
+    Lambda(String, Term, Term)
+    // Application: Applying a function to an argument.
+    Apply(Term, Term)
+    // Sigma Type: `Σ(x : A). B`, a dependent pair type.
+    Sigma(String, Term, Term)
+    // Pair Term: `(a, b)`.
+    Pair(Term, Term)
+    // Projection: Extracting the first or second element of a pair.
+    Proj(Projection, Term)
+}
+
+type Projection = inductive {
+    Fst; Snd
+}
+
+/**
+ * `Value` represents the evaluated form of terms, reducing to values during evaluation.
+ */
+type Value = inductive {
+    // Neutral Value: A value that cannot be reduced further
+    Neutral(NeutralValue)
+    // Universe Level: A type at a specific universe level.
+    Type(Int)
+    // Lambda Function: A function value with its parameter type and body.
+    Lambda(Value, Value -> Value)
+    // Pi Type Value: Represents a dependent function type.
+    Pi(Value, Value -> Value)
+    // Sigma Type Value: Represents a dependent pair type.
+    Sigma(Value, Value -> Value)
+    // Pair Value: A pair of values.
+    Pair(Value, Value)
+}
+
+/**
+ * Types are represented as values within this implementation.
+ */
+type Type = Value
+
+// **Neutral Values**
+
+/*
+ * `NeutralValue` represents expressions that cannot be evaluated further due to
+ * the absence of sufficient information (e.g., variables or applications of variables).
+ */
+type NeutralValue = inductive {
+    // Variable: A neutral value representing an unresolved variable.
+    Var(String)
+    // Application: Applying a neutral function to a value.
+    Apply(NeutralValue, Value)
+    // Projection: Extracting the first or second element of a pair.
+    Proj(Projection, NeutralValue)
+}
+
+/**
+ * Converts a `NeutralValue` into a `Value`.
+ * @param neutral The `NeutralValue` to convert.
+ * @return The resulting `Value`.
+ */
+def toValue(neutral: NeutralValue): Value = Value::Neutral(neutral)
+
+/**
+ * `TypedValue` pairs a value with its type, essential for type checking and
+ * ensuring type safety during evaluation.
+ */
+type TypedValue = record {
+    value: Value    // The evaluated value.
+    ty: Type        // The type of the value.
+}
+
+/**
+ * `Env` represents the typing context, mapping variable names to their corresponding typed values.
+ */
+type Env = inductive {
+    Empty
+    Cons(String, TypedValue, Env)
+}
+
+/**
+ * Adds a new binding to the environment.
+ * @param env The current environment.
+ * @param name The variable name.
+ * @param value The value to bind.
+ * @param ty The type of the value.
+ * @return A new environment with the added binding.
+ */
+def add(env: Env, name: String, value: Value, ty: Type): Env = {
+    let typedValue = TypedValue '{
+        value = value  // The value associated with the name.
+        ty = ty        // The type of the value.
+    }
+    Env::Cons(name, typedValue, env)
+}
+
+/**
+ * Adds a variable to the environment as a neutral value, commonly used when introducing parameters.
+ * @param env The current environment.
+ * @param ident The identifier of the variable.
+ * @param ty The type of the variable.
+ * @return A new environment with the variable added as a neutral value.
+ */
+def addVar(env: Env, ident: String, ty: Type): Env = {
+    env.add(ident, NeutralValue::Var(ident).toValue, ty)
+}
+
+/**
+ * Retrieves a binding from the environment by name.
+ * @param env The current environment.
+ * @param name The name of the variable to retrieve.
+ * @return An `Option` of `TypedValue` containing the variable's type if found, or `None` if not found.
+ */
+def get(env: Env, name: String): Option[TypedValue] = {
+    match env {
+        case Env::Empty => Option[TypedValue]::None  // Name not found.
+        case Env::Cons(name', value, env') => {
+            if name' == name then Option[TypedValue]::Some(value)
+            else env'.get(name) // Search in the rest of the environment.
+        }
+    }
+}
+
+/**
+ * Checks if a name exists in the environment.
+ * @param env The current environment.
+ * @param name The name to check for.
+ * @return `true` if the name exists in the environment, `false` otherwise.
+ */
+def contains(env: Env, name: String): Bool = match env {
+    case Env::Empty => false  // Name not found.
+    case Env::Cons(name', _, env') => name' == name || env'.contains(name)  // Found or continue searching.
+}
+
+/**
+ * Generates a fresh identifier not present in the environment, used to avoid variable capture during substitution.
+ * @param env The current environment.
+ * @param cnt The starting count for generating identifiers.
+ * @return A fresh identifier not currently in the environment.
+ */
+def freshIdentFrom(env: Env, cnt: Int): String = {
+    let ident = "$" ++ cnt.toString     // Generates identifiers like `$0`, `$1`, etc.
+    if !env.contains(ident) then ident  // If not in the environment, it's fresh.
+    else env.freshIdentFrom(cnt + 1)    // Try the next identifier.
+}
+
+/**
+ * Generates a fresh identifier starting from `$0`.
+ * @param env The current environment.
+ * @return A fresh identifier.
+ */
+def freshIdent(env: Env): String = env.freshIdentFrom(0)
+
+/**
+ * Evaluates a `Term` in a given environment to produce a `Value`.
+ * Evaluation proceeds by pattern matching on the term's structure.
+ * @param env The current environment.
+ * @param expr The `Term` to evaluate.
+ * @return The evaluated `Value`.
+ */
+def evaluate(env: Env, expr: Term): Value = match expr {
+    // Look up the variable's value.
+    case Term::Var(name) => env.get(name).unwrap[TypedValue].value
+    // A type evaluates to itself.
+    case Term::Type(univ) => Value::Type(univ)
+    // Lambda Evaluation: Constructs a closure capturing the environment and parameter.
+    case Term::Lambda(paramIdent, paramTypeTerm, bodyTerm) => {
+        let paramType = env.evaluate(paramTypeTerm) // Evaluate parameter type.
+        let closure = (arg: Value) => {
+            // Evaluate the body with the argument bound.
+            env.add(paramIdent, arg, paramType).evaluate(bodyTerm)
+        }
+        Value::Lambda(paramType, closure)
+    }
+    // Pi Type Evaluation: Similar to lambda
+    case Term::Pi(paramIdent, paramTypeTerm, codomainTerm) => {
+        let paramType = env.evaluate(paramTypeTerm) // Evaluate parameter type.
+        let closure = (arg: Value) => {
+            // Evaluate codomain with argument bound.
+            env.add(paramIdent, arg, paramType).evaluate(codomainTerm)
+        }
+        Value::Pi(paramType, closure)
+    }
+    // Sigma Type Evaluation: Similar to lambda
+    case Term::Sigma(paramIdent, paramTypeTerm, codomainTerm) => {
+        let paramType = env.evaluate(paramTypeTerm) // Evaluate parameter type.
+        let closure = (arg: Value) => {
+            // Evaluate codomain with argument bound.
+            env.add(paramIdent, arg, paramType).evaluate(codomainTerm)
+        }
+        Value::Sigma(paramType, closure)
+    }
+    // Function Application Evaluation
+    case Term::Apply(fn, arg) => match env.evaluate(fn) {
+        // Apply function to the argument.
+        case Value::Lambda(_, fn) => fn(env.evaluate(arg))
+        // Neutral Application: Cannot reduce further; keep it a neutral value.
+        case Value::Neutral(neutral) => NeutralValue::Apply(neutral, env.evaluate(arg)).toValue
+        case _ => panic("Invalid type: not a function")
+    }
+    // Pair Construction
+    case Term::Pair(fst, snd) => Value::Pair(env.evaluate(fst), env.evaluate(snd))
+    // Pair Projection
+    case Term::Proj(proj, pair) => match env.evaluate(pair) {
+        case Value::Pair(fst, snd) => match proj {
+            case Projection::Fst => fst
+            case Projection::Snd => snd
+        }
+        case Value::Neutral(neutral) => NeutralValue::Proj(proj, neutral).toValue
+        case _ => panic("Invalid type: not a pair")
+    }
+}
+
+/**
+ * Converts a `NeutralValue` back into a `Term`, used during normalization to reconstruct
+ * terms from evaluated values.
+ * @param neutral The `NeutralValue` to convert.
+ * @param env The current environment.
+ * @return The reconstructed `Term`.
+ */
+def readBack(neutral: NeutralValue, env: Env): Term = match neutral {
+    // Convert variable to term.
+    case NeutralValue::Var(name) => Term::Var(name)
+    // Reconstruct application.
+    case NeutralValue::Apply(fn, arg) => Term::Apply(fn.readBack(env), arg.readBack(env))
+    // Reconstruct projection.
+    case NeutralValue::Proj(proj, neutral) => Term::Proj(proj, neutral.readBack(env))
+}
+
+/**
+ * Converts a `Value` back into a `Term`, effectively normalizing the term by reducing it to its simplest form.
+ * @param value The `Value` to convert.
+ * @param env The current environment.
+ * @return The normalized `Term`.
+ */
+def readBack(value: Value, env: Env): Term = match value {
+    case Value::Neutral(neutral) => neutral.readBack(env)
+    case Value::Type(univ) => Term::Type(univ)
+    case Value::Pair(fst, snd) => Term::Pair(fst.readBack(env), snd.readBack(env))
+
+    // Lambda Normalization: Generate a fresh variable to avoid capture.
+    case Value::Lambda(paramType, fn) => {
+        let paramIdent: String = env.freshIdent
+        // Normalize parameter type.
+        let paramTypeTerm = paramType.readBack(env)
+        // Create variable value.
+        let variable: Value = NeutralValue::Var(paramIdent).toValue
+        // Extend environment.
+        let updatedEnv = env.add(paramIdent, variable, env.evaluate(paramTypeTerm))
+        Term::Lambda(
+            paramIdent, paramTypeTerm,         // Construct lambda term.
+            fn(variable).readBack(updatedEnv)  // Normalize the body.
+        )
+    }
+
+    // Pi Type Normalization: Similar to lambda normalization.
+    case Value::Pi(paramType, fn) => {
+        // Fresh parameter name.
+        let paramIdent: String = env.freshIdent
+        // Normalize parameter type.
+        let paramTypeTerm = paramType.readBack(env)
+        // Create variable value.
+        let variable: Value = NeutralValue::Var(paramIdent).toValue
+        // Extend environment.
+        let updatedEnv = env.add(paramIdent, variable, env.evaluate(paramTypeTerm))
+        Term::Pi(
+            paramIdent, paramTypeTerm,          // Construct Pi type term.
+            fn(variable).readBack(updatedEnv)   // Normalize the codomain.
+        )
+    }
+
+    // Sigma Type Normalization: Similar to lambda normalization.
+    case Value::Sigma(paramType, fn) => {
+        // Fresh parameter name.
+        let paramIdent: String = env.freshIdent
+        // Normalize parameter type.
+        let paramTypeTerm = paramType.readBack(env)
+        // Create variable value.
+        let variable: Value = NeutralValue::Var(paramIdent).toValue
+        // Extend environment.
+        let updatedEnv = env.add(paramIdent, variable, env.evaluate(paramTypeTerm))
+        Term::Sigma(
+            paramIdent, paramTypeTerm,          // Construct Sigma type term.
+            fn(variable).readBack(updatedEnv)   // Normalize the codomain.
+        )
+    }
+}
+
+/**
+ * Retrieves the universe level from a `Type` value.
+ * Universe levels are critical in MLTT to maintain consistency and avoid paradoxes.
+ * @param ty The `Type` value.
+ * @return The universe level as an `Int`.
+ */
+def universeLevel(ty: Type): Int = match ty {
+    case Value::Type(univ) => univ                                  // Extract universe level.
+    case _ => panic("Failed to unwrap universe level: not a type")  // Panic if not a type.
+}
+
+/**
+ * Infers the type of a `Term` within a given environment following MLTT's typing rules.
+ * @param env The current environment.
+ * @param expr The `Term` whose type is inferred.
+ * @return The inferred type as a `Value`.
+ */
+def infer(env: Env, expr: Term): Value = match expr {
+
+    // Retrieve the variable's type from the environment.
+    case Term::Var(name) => env.get(name).unwrap[TypedValue].ty
+
+    // `Type(n)` has type `Type(n + 1)`.
+    case Term::Type(univ) => Value::Type(univ + 1)
+
+    // Lambda Type Inference:
+    case Term::Lambda(paramIdent, paramTypeTerm, bodyTerm) => {
+        // Infer parameter type's universe level.
+        let paramLevel = env.infer(paramTypeTerm).universeLevel
+        // Evaluate parameter type.
+        let paramType: Type = env.evaluate(paramTypeTerm)
+        // Create variable for parameter.
+        let variable: Value = NeutralValue::Var(paramIdent).toValue
+        // Extend environment with parameter.
+        let bodyEnv = env.add(paramIdent, variable, paramType)
+        // Infer body's type.
+        let returnType: Type = bodyEnv.infer(bodyTerm)
+        // The lambda's type is a Pi type from parameter to return type.
+        Value::Pi(
+            paramType,
+            (arg: Value) => {
+                // Infer argument's type.
+                let argType = env.infer(arg.readBack(bodyEnv))
+                // Evaluate the body.
+                bodyEnv.add(paramIdent, arg, argType).evaluate(bodyTerm)
+            }
+        )
+    }
+
+    // Pair Type Inference:
+    case Term::Pair(fst, snd) => {
+        // Infer the type of the first element.
+        let fstType: Type = env.infer(fst)
+        // Infer the type of the second element.
+        let sndType: Type = env.infer(snd)
+        // The pair type is a Sigma type of the two elements.
+        Value::Sigma(fstType, (fstValue: Value) => {
+            Value::Sigma(sndType, (sndValue: Value) => Value::Pair(fstValue, sndValue))
+        })
+    }
+
+    // Pi Type Inference:
+    case Term::Pi(paramIdent, paramTypeTerm, returnTypeTerm) => {
+        // Infer parameter type's universe level.
+        let paramLevel = env.infer(paramTypeTerm).universeLevel
+        // Evaluate parameter type.
+        let paramType: Type = env.evaluate(paramTypeTerm)
+        // Create variable for parameter.
+        let variable: Value = NeutralValue::Var(paramIdent).toValue
+        let returnTypeLevel = env.add(paramIdent, variable, paramType).infer(returnTypeTerm).universeLevel
+        // The Pi type's universe level is the maximum of parameter and return types.
+        Value::Type(max paramLevel returnTypeLevel)
+    }
+
+    // Sigma Type Inference:
+    case Term::Sigma(paramIdent, paramTypeTerm, codomainTerm) => {
+        // Infer parameter type's universe level.
+        let paramLevel = env.infer(paramTypeTerm).universeLevel
+        // Evaluate parameter type.
+        let paramType: Type = env.evaluate(paramTypeTerm)
+        // Create variable for parameter.
+        let variable: Value = NeutralValue::Var(paramIdent).toValue
+        let rhsTypeLevel = env.add(paramIdent, variable, paramType).infer(codomainTerm).universeLevel
+        // The sigma type's universe level is the maximum of lhs and rhs types.
+        Value::Type(max paramLevel rhsTypeLevel)
+    }
+}
+
+/**
+ * Normalizes a `Term` by evaluating it and converting the result back into a term.
+ * Normalization is essential for comparing terms for equality and ensuring consistent behavior.
+ * @param env The current environment.
+ * @param expr The `Term` to normalize.
+ * @return The normalized `Term`.
+ */
+def normalize(env: Env, expr: Term): Term = env.evaluate(expr).readBack(env)
+
+def pretty(expr: Term): String = match expr {
+    case Term::Var(name) => name
+    case Term::Type(univ) => "Type(" ++ univ.toString ++ ")"
+    case Term::Lambda(paramIdent, paramType, body) =>
+        "λ(" ++ paramIdent ++ " : " ++ paramType.pretty ++ "). " ++ body.pretty
+    case Term::Apply(fn, arg) => "(" ++ fn.prettyAtom ++ " " ++ arg.prettyAtom ++ ")"
+    case Term::Pi(paramIdent, paramType, returnType) =>
+        "Π(" ++ paramIdent ++ " : " ++ paramType.pretty ++ "). " ++ returnType.pretty
+    case Term::Sigma(paramIdent, paramType, codomain) =>
+        "Σ(" ++ paramIdent ++ " : " ++ paramType.pretty ++ "). " ++ codomain.pretty
+    case Term::Pair(fst, snd) => "(" ++ fst.pretty ++ ", " ++ snd.pretty ++ ")"
+    case Term::Proj(Projection::Fst, pair) => "fst " ++ pair.pretty
+}
+
+def prettyAtom(expr: Term): String = match expr {
+    case Term::Var(name) => name
+    case Term::Type(_) => expr.pretty
+    case Term::Lambda(_, _, _) => "(" ++ expr.pretty ++ ")"
+    case Term::Apply(_, _) => "(" ++ expr.pretty ++ ")"
+    case Term::Pi(_, _, _) => "(" ++ expr.pretty ++ ")"
+    case Term::Sigma(_, _, _) => "(" ++ expr.pretty ++ ")"
+    case Term::Pair(_, _) => expr.pretty
+    case Term::Proj(_, _) => "(" ++ expr.pretty ++ ")"
+}
+
+def var(ident: String): Value = NeutralValue::Var(ident).toValue
+
+def prelude: Env = Env::Empty
+    .addVar("Any", Value::Type(0))
+    .addVar("Nothing", Value::Type(0))
+    .addVar("Bool", Value::Type(0))
+    .addVar("true", var("Bool"))
+    .addVar("false", var("Bool"))
+    .addVar("Nat", Value::Type(0))
+    .addVar("zero", var("Nat"))
+    .addVar("succ", Value::Pi(var("Nat"), (n: Value) => var("Nat")))
+
+eval "\nBeta-reduction: (λx. t) v -> t[x := v]  Case 1: x[x := N] = N"
+eval {
+    let term: Term = Term::Apply(
+        Term::Lambda("x", Term::Var("Bool"), Term::Var("x")),
+        Term::Var("true")
+    )
+    term.pretty ++ "  ≡  " ++ prelude.normalize(term).pretty
+}
+
+eval "\nBeta-reduction: (λx. t) v -> t[x := v]  Case 2: y[x := N] = y, if x ≠ y"
+eval {
+    let term: Term = Term::Apply(
+        Term::Lambda(
+            "x", Term::Var("Bool"),
+            Term::Lambda("y", Term::Var("Bool"), Term::Var("y"))
+        ),
+        Term::Var("true")
+    )
+    term.pretty ++ "  ≡  " ++ prelude.normalize(term).pretty
+}
+
+eval "\nHigher-order function:"
+eval {
+    let term = Term::Apply(
+        Term::Lambda("f", Term::Pi("x", Term::Var("Bool"), Term::Var("Bool")),
+            Term::Apply(Term::Var("f"), Term::Var("true"))
+        ),
+        Term::Lambda("x", Term::Var("Bool"), Term::Var("x"))
+    )
+    term.pretty ++ "  ≡  " ++ prelude.normalize(term).pretty
+}
+
+eval "\nAlpha-conversion: λx. t -> λy. t[x := y] -- no name collision"
+eval {
+    let term = Term::Pi("A", Term::Type(0),
+        Term::Lambda("x", Term::Var("A"), Term::Var("x"))
+    )
+    term.pretty ++ "  ≡  " ++ prelude.normalize(term).pretty
+}
+
+eval "\nSigma type - elimination"
+eval {
+    let term = Term::Apply(
+        Term::Lambda("p", Term::Sigma("A", Term::Var("Bool"), Term::Var("A")),
+            Term::Proj(Projection::Fst, Term::Var("p"))
+        ),
+        Term::Pair(Term::Var("true"), Term::Var("false"))
+    )
+    term.pretty ++ "  ≡  " ++ prelude.normalize(term).pretty
+}
+
+eval "\nChurch numeral 0:"
+eval {
+    let zero = Term::Lambda("f", Term::Pi("x", Term::Var("Any"), Term::Var("Any")),
+        Term::Lambda("x", Term::Var("Any"), Term::Var("x"))
+    )
+    zero.pretty ++ "  ≡  " ++ prelude.normalize(zero).pretty
+}
+
+eval "\nChurch numeral 1:"
+eval {
+    let one = Term::Lambda("f", Term::Pi("x", Term::Var("Any"), Term::Var("Any")),
+        Term::Lambda("x", Term::Var("Any"), Term::Apply(Term::Var("f"), Term::Var("x")))
+    )
+    one.pretty ++ "  ≡  " ++ prelude.normalize(one).pretty
+}

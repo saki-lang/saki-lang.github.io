@@ -1,0 +1,112 @@
+def Eq(A: 'Type, a b: A): 'Type = ∀(P: A -> 'Type) -> P(a) -> P(b)
+
+def refl(A: 'Type, a: A): A.Eq(a, a) = {
+    (P: A -> 'Type, pa: P(a)) => pa
+}
+
+def symmetry(A: 'Type, a b: A, eqab: A.Eq(a, b)): A.Eq(b, a) = {
+    eqab((b': A) => A.Eq(b', a), A.refl(a))
+}
+
+type ℕ = inductive {
+    Zero
+    Succ(ℕ)
+}
+
+def o: ℕ = ℕ::Zero
+def succ(n: ℕ): ℕ = ℕ::Succ(n)
+
+operator binary (===) left-assoc {
+    looser-than (+)
+}
+
+def (===)(a b: ℕ): 'Type = ℕ.Eq(a, b)
+
+def (+)(a b : ℕ): ℕ = match a {
+    case ℕ::Zero => b
+    case ℕ::Succ(a') => ℕ::Succ(a' + b)
+}
+
+def induction(
+    P: ℕ -> 'Type,
+    base: P(ℕ::Zero),
+    step: ∀(n: ℕ) -> P(n) -> P(n.succ),
+    nat: ℕ,
+): P(nat) = match nat {
+    case ℕ::Zero => base
+    case ℕ::Succ(n') => step(n', P.induction(base, step, n'))
+}
+
+def inductionReduce(
+    a b: ℕ,
+    eqba: (b === a),
+    P: ℕ -> 'Type,
+    pa: P(a),
+): P(b) = {
+    let eqab = ℕ.symmetry(b, a, eqba)
+    eqab(P, pa)
+}
+
+def theoremPlusZero: ∀(n: ℕ) -> (n + o === n) = {
+    ((n: ℕ) => (n + o === n)).induction(
+        ℕ.refl(ℕ::Zero),
+        (n: ℕ, assumption: (n + o === n)) => {
+            inductionReduce(
+                n, n + o, assumption,
+                (n': ℕ) => (n'.succ === n.succ),
+                ℕ.refl(n.succ)
+            )
+        }
+    )
+}
+
+def leibnizEq(f: ℕ -> ℕ): ∀(a: ℕ) -> ∀(b: ℕ) -> (a === b) -> (f(a) === f(b)) = {
+    (a b : ℕ, eqab: (a === b)) => {
+        (P: ℕ -> 'Type, pfa: P(f a)) => eqab((b': ℕ) => P(f b'), pfa)
+    }
+}
+
+def theoremPlusZeroInv: ∀(n: ℕ) -> (n === n + o) = {
+    (n: ℕ) => ℕ.symmetry(n + o, n, theoremPlusZero(n))
+}
+
+def theoremPlusSucc: ∀(a: ℕ) -> ∀(b: ℕ) -> (succ(a + b) === a + b.succ) = {
+    (a b : ℕ) => induction(
+        (a': ℕ) => (succ(a' + b) === a' + b.succ),
+        ℕ.refl(succ(o + b)),
+        (a': ℕ, assumption: (succ(a' + b) === a' + b.succ)) => {
+            leibnizEq(succ, succ(a' + b), a' + b.succ, assumption)
+        }, a
+    )
+}
+
+def transitivity(A: 'Type, a b c: A, eqab: A.Eq(a, b), eqbc: A.Eq(b, c)): A.Eq(a, c) = {
+    (P: A -> 'Type, pa: P(a)) => eqbc(P, eqab(P, pa))
+}
+
+def theoremPlusComm: ∀(a: ℕ) -> ∀(b: ℕ) -> (a + b === b + a) = {
+    (a: ℕ, b: ℕ) => induction(
+        (a': ℕ) => (a' + b === b + a'),
+        theoremPlusZeroInv b,
+        (a': ℕ, IH: (a' + b === b + a')) => {
+            let eq1 = ℕ.refl(succ(a' + b))                  // succ(a') + b === succ(a' + b)
+            let eq2 = leibnizEq(succ, a' + b, b + a', IH)   // succ(a' + b) === succ(b + a')
+            let eq3 = theoremPlusSucc(b, a')                // succ(b + a') === b + succ(a')
+            let eq4 = transitivity(ℕ, succ(a' + b), succ(b + a'), b + succ(a'), eq2, eq3)
+            transitivity(ℕ, succ(a') + b, succ(a' + b), b + succ(a'), eq1, eq4)
+        }, a
+    )
+}
+
+eval "∀(n: ℕ), n + 0 = n"
+eval theoremPlusZero
+
+eval ""
+
+eval "∀(a b : ℕ), S(a + b) = a + S(b)"
+eval theoremPlusSucc
+
+eval ""
+
+eval "∀(a b : ℕ), a + b = b + a"
+eval theoremPlusComm
